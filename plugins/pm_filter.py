@@ -32,13 +32,13 @@ async def pm_search(client, message):
     sili = silicondb.get_bot_sttgs()
     if not sili.get('PM_SEARCH', False) if sili else False:
         return await message.reply_text('<b><i>ᴘᴍ sᴇᴀʀᴄʜ ᴡᴀs ᴅɪsᴀʙʟᴇᴅ sᴇᴀʀᴄʜ ɪɴ ᴍᴏᴠɪᴇ ɢʀᴏᴜᴘ!</i></b>')
-    
+
     if not sili.get('AUTO_FILTER', True) if sili else True:
         return await message.reply_text('<b><i>ᴀᴜᴛᴏ ꜰɪʟᴛᴇʀ ᴡᴀs ᴅɪsᴀʙʟᴇᴅ!</i></b>')
-   
+
     await auto_filter(client, message)
 
-    
+
 @Client.on_message(filters.group & filters.text & filters.incoming)
 async def group_search(client, message):
     user_id = message.from_user.id if message.from_user else None
@@ -58,7 +58,7 @@ async def group_search(client, message):
                     await asyncio.sleep(300)
                     return await msg.delete()
                 else: return   
-  
+
     if not sili.get('AUTO_FILTER', True) if sili else True:
         return await message.reply_text('<b><i>ᴀᴜᴛᴏ ꜰɪʟᴛᴇʀ ᴡᴀs ᴅɪsᴀʙʟᴇᴅ!</i></b>')
 
@@ -66,13 +66,13 @@ async def group_search(client, message):
         if not user_id:
             await message.reply("<b>🚨 ɪ'ᴍ ɴᴏᴛ ᴡᴏʀᴋɪɴɢ ꜰᴏʀ ᴀɴᴏɴʏᴍᴏᴜꜱ ᴀᴅᴍɪɴ!</b>")
             return
-        
+
         if 'hindi' in message.text.lower() or 'tamil' in message.text.lower() or 'telugu' in message.text.lower() or 'malayalam' in message.text.lower() or 'kannada' in message.text.lower() or 'english' in message.text.lower() or 'gujarati' in message.text.lower(): 
             return await auto_filter(client, message)
 
         elif message.text.startswith("/"):
             return
-        
+
         elif re.findall(r'https?://\S+|www\.\S+|t\.me/\S+', message.text):
             if await is_check_admin(client, message.chat.id, message.from_user.id):
                 return
@@ -609,7 +609,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data == "ref_point":
         await query.answer(f'You Have: {silicondb.get_silicon_refer_points(query.from_user.id)} Refferal points.', show_alert=True)
-        
+
     elif query.data == "top_search":
         searches = await process_trending_data(limit=20, format_type="keyboard")
         keyboard = create_keyboard_layout(searches)
@@ -681,7 +681,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data.startswith("lang_art"):
         _, lang = query.data.split("#")
         await query.answer(f"ʏᴏᴜ sᴇʟᴇᴄᴛᴇᴅ {lang.title()} ʟᴀɴɢᴜᴀɢᴇ ⚡️", show_alert=True)
-  
+
     elif query.data == "start":
         buttons = [
             [
@@ -737,7 +737,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         await query.edit_message_reply_markup(
             reply_markup=reply_markup
         )
-        
+
     elif query.data == "features":
         buttons = [[
             InlineKeyboardButton('📸 ᴛ-ɢʀᴀᴘʜ', callback_data='telegraph'),
@@ -748,7 +748,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
           InlineKeyboardButton('🧾 ᴀᴅᴍɪɴ ᴄᴍᴅ', callback_data='admincmd')
         ],
         [
-	      InlineKeyboardButton('⋞ ʜᴏᴍᴇ', callback_data='start')
+              InlineKeyboardButton('⋞ ʜᴏᴍᴇ', callback_data='start')
         ]] 
         reply_markup = InlineKeyboardMarkup(buttons)
         await query.message.edit_text(                     
@@ -783,10 +783,38 @@ async def cb_handler(client: Client, query: CallbackQuery):
         await query.message.edit_text(
             script.ABOUT_TEXT.format(temp.B_LINK),
             reply_markup = InlineKeyboardMarkup(
-                [[InlineKeyboardButton('⋞ ʜᴏᴍᴇ', callback_data='start')]]
+                [[
+            InlineKeyboardButton ('🎁 sᴏᴜʀᴄᴇ', callback_data='source'),
+            InlineKeyboardButton ('📖 ᴅᴍᴄᴀ', callback_data='dmca')
+        ],[
+            InlineKeyboardButton('⋞ ʜᴏᴍᴇ', callback_data='start')]]
                 ),
             disable_web_page_preview = True
         )
+
+    elif query.data == "source":
+        buttons = [[
+            InlineKeyboardButton('ꜱᴏᴜʀᴄᴇ ᴄᴏᴅᴇ 📜', url='https://github.com/Silicon-Developer/Auto-Filter-Bot.git'),
+            InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='about')
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.edit_text(
+            text=script.SOURCE_TXT,
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+
+    elif query.data == "dmca":
+            btn = [[
+                    InlineKeyboardButton("⇋ ʙᴀᴄᴋ ⇋", callback_data="about")
+                  ]]
+            reply_markup = InlineKeyboardMarkup(btn)
+            await query.message.edit_text(
+                text=(script.DISCLAIMER_TXT),
+                reply_markup=reply_markup,
+                parse_mode=enums.ParseMode.HTML 
+            )
+
     elif query.data == "earn":
         buttons = [[
             InlineKeyboardButton('⋞ ʜᴏᴍᴇ', callback_data='start'),
@@ -817,7 +845,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             text=script.FONT_TXT,
             reply_markup=reply_markup,
             parse_mode=enums.ParseMode.HTML
-	)
+        )
 
     elif query.data == "all_files_delete":
         files_primary = collection.count_documents({})
@@ -847,7 +875,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         await query.message.edit('ᴅᴇʟᴇᴛɪɴɢ...')
         deleted = await delete_files(query_)
         await query.message.edit(f'ᴅᴇʟᴇᴛᴇᴅ {deleted} ꜰɪʟᴇs ɪɴ ʏᴏᴜʀ ᴅᴀᴛᴀʙᴀsᴇ ɪɴ ʏᴏᴜʀ ǫᴜᴇʀʏ {query_}')
-          
+
     elif query.data.startswith("reset_grp_data"):
         grp_id = query.message.chat.id
         btn = [[
@@ -922,7 +950,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await d.delete()
         else:
             await query.message.edit_text("<b>ꜱᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ ᴡʀᴏɴɢ</b>")
-            
+
     elif query.data.startswith("batchfiles"):
         ident, group_id, message_id, user = query.data.split("#")
         group_id = int(group_id)
