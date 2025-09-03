@@ -18,12 +18,12 @@ def is_valid_ip(ip):
 
 # Main Variables 
 
-API_ID = int(environ.get('API_ID', '24998279'))
-API_HASH = environ.get('API_HASH', 'b2ec3ab8ed156e7a6782f3d7d1acbaf6')
-BOT_TOKEN = environ.get('BOT_TOKEN', '7905405542:AAElAaU4mfvktB3_E9ySOZplzTfe93NqmiY')
-ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '1855665805').split()]
+API_ID = int(environ.get('API_ID', ''))
+API_HASH = environ.get('API_HASH', '')
+BOT_TOKEN = environ.get('BOT_TOKEN', '')
+ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '').split()]
 USERNAME = environ.get('USERNAME', "https://telegram.me/Silicon_Official")
-LOG_CHANNEL = int(environ.get('LOG_CHANNEL', '-1002470027489'))
+LOG_CHANNEL = int(environ.get('LOG_CHANNEL', ''))
 MOVIE_GROUP_LINK = environ.get('MOVIE_GROUP_LINK', 'https://t.me/LuciferCinema')
 
 # Pics 
@@ -34,8 +34,8 @@ FSUB_PICS = (environ.get('FSUB_PICS', 'https://graph.org/file/7478ff3eac37f4329c
 
 # Database Settings
 
-DATABASE_URI = environ.get('DATABASE_URI', "mongodb+srv://Jng:jng@cluster0.vvrnobg.mongodb.net/?retryWrites=true&w=majority")
-FILES_DATABASE_URL = environ.get('FILES_DATABASE_URL', "mongodb+srv://Jng:jng@cluster0.vvrnobg.mongodb.net/?retryWrites=true&w=majority") # For Files
+DATABASE_URI = environ.get('DATABASE_URI', "mongodb+srv://@cluster0.mongodb.net/?retryWrites=true&w=majority")
+FILES_DATABASE_URL = environ.get('FILES_DATABASE_URL', "mongodb+srv://@cluster0.mongodb.net/?retryWrites=true&w=majority") # For Files
 SECOND_FILES_DATABASE_URL = environ.get('SECOND_FILES_DATABASE_URL', "") # 2nd DB For Files
 DATABASE_NAME = environ.get('DATABASE_NAME', "Silicon")
 COLLECTION_NAME = environ.get('COLLECTION_NAME', 'Silicon_Files')
@@ -43,8 +43,8 @@ COLLECTION_NAME = environ.get('COLLECTION_NAME', 'Silicon_Files')
 # Verify/Shortlink Settings 
 
 IS_VERIFY = is_enabled('IS_VERIFY', True)
-LOG_VR_CHANNEL = int(environ.get('LOG_VR_CHANNEL', '-1002470027489'))
-LOG_API_CHANNEL = int(environ.get('LOG_API_CHANNEL', '-1002470027489'))
+LOG_VR_CHANNEL = int(environ.get('LOG_VR_CHANNEL', ''))
+LOG_API_CHANNEL = int(environ.get('LOG_API_CHANNEL', ''))
 TUTORIAL = environ.get("TUTORIAL", "https://t.me/Silicon_Bot_Update")
 TUTORIAL2 = environ.get("TUTORIAL2", "https://t.me/Silicon_Bot_Update")
 TUTORIAL3 = environ.get("TUTORIAL3", "https://t.me/Silicon_Bot_Update")
@@ -74,9 +74,9 @@ REQUEST_CHANNEL = int(request_channel) if request_channel and id_pattern.search(
 # Movie Update Notification Settings/ Auto Index Settings
 
 MOVIE_UPDATE_NOTIFICATION = bool(environ.get('MOVIE_UPDATE_NOTIFICATION', False))  # Notification On (True) / Off (False)
-MOVIE_UPDATE_CHANNEL = int(environ.get('MOVIE_UPDATE_CHANNEL', '-1002868853767'))  # Notification of sent to your channel
-CHANNELS = [int(ch) if id_pattern.search(ch) else ch for ch in environ.get('CHANNELS', '-1002868853767').split()] # Auto Index Channel
-DELETE_CHANNELS = int(environ.get('DELETE_CHANNELS','-1002470027489')) # Channel to delete file from DB
+MOVIE_UPDATE_CHANNEL = int(environ.get('MOVIE_UPDATE_CHANNEL', ''))  # Notification of sent to your channel
+CHANNELS = [int(ch) if id_pattern.search(ch) else ch for ch in environ.get('CHANNELS', '').split()] # Auto Index Channel
+DELETE_CHANNELS = int(environ.get('DELETE_CHANNELS','')) # Channel to delete file from DB
 IMAGE_FETCH = bool(environ.get('IMAGE_FETCH', True))  # On (True) / Off (False)
 LINK_PREVIEW = bool(environ.get('LINK_PREVIEW', False)) # Shows link preview in notification msg instead of image
 ABOVE_PREVIEW = bool(environ.get('ABOVE_PREVIEW', True)) # Shows link preview above the text in notification msg if True else below the msg
