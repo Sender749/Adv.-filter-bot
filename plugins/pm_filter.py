@@ -16,8 +16,8 @@ import random
 lock = asyncio.Lock()
 import traceback
 from fuzzywuzzy import process
-
 import logging
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
