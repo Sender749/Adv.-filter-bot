@@ -110,7 +110,7 @@ SEASONS = [f'season {i}'for i in range (1 , 23)]
 # Stream Settings 
 
 IS_PREMIUM_STREAM = is_enabled('IS_PREMIUM_STREAM', False) # True To Allow Stream For Premium User Only
-BIN_CHANNEL = environ.get("BIN_CHANNEL", "-1002470027489") # Channel Where Files sent For stream
+BIN_CHANNEL = environ.get("BIN_CHANNEL", "") # Channel Where Files sent For stream
 if len(BIN_CHANNEL) == 0:
     print('error BIN_CHANNEL is missing, exiting now')
     exit()
