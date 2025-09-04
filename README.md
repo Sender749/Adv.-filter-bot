@@ -144,9 +144,8 @@ python3 bot.py
 ## 🏆 Special Recognition
 # Credits 🎉
 
-- **Silicon-Developer** 😎 – Rewrote the ENTIRE code from start to finish and added Many powerful new features!  
-- **[@Its_Raazz](https://t.me/Its_Raazz)** – Big help with Movie Updates, Fsub, and improvements in many functions.  
-- **[@MR_Spidy](https://t.me/MR_Spidy)** – Thanks a ton for the Refer feature!   [Authors](https://github.com/Silicon-Developer/Auto-Filter-Bot/blob/SiliconBotz/credit.txt) For their Special Effort in Public Contribution.
+- Silicon-Developer 😎 – Rewrote the ENTIRE code from start to finish and added Many powerful new features! (It's Me)
+- @Its_Raazz – Big help with Movie Updates, Fsub, and improvements in many functions.  [Authors](https://github.com/Silicon-Developer/Auto-Filter-Bot/blob/SiliconBotz/credit.txt) For their Special Effort in Public Contribution.
 - [Contributors](https://github.com/Silicon-Developer/Auto-Filter-Bot/graphs/contributors) For their Support to make it better.
 - And All Who Help us in This Journey.
 
