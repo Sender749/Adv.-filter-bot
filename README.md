@@ -147,7 +147,7 @@ python3 bot.py
 - [Silicon-Developer](t.me/Silicon_Official) Rewrote the ENTIRE code from start to finish and added many powerful new features! (It's Me 😎)
 - [Its-Raazz](t.me/Its_Raazz) For His Support in Code.
 - [Authors](https://github.com/Silicon-Developer/Auto-Filter-Bot/blob/SiliconBotz/credit.txt) For their Special Effort in Public Contribution.
-- [Contributors](https://github.com/HA-Bots/Auto-Filter-Bot/graphs/contributors) For their Support to make it better.
+- [Contributors](https://github.com/Silicon-Developer/Auto-Filter-Bot/graphs/contributors) For their Support to make it better.
 - And All Who Help us in This Journey.
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
