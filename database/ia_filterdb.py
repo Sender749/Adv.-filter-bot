@@ -109,8 +109,8 @@ async def get_search_results(query, max_results=MAX_BTN, offset=0, lang=None):
 
     if lang:
         lang_files = [file for file in results if lang in file['file_name'].lower()]
-        files = lang_files[offset:][:max_results]
         total_results = len(lang_files)
+        files = lang_files[offset:offset + max_results]
         next_offset = offset + max_results
         if next_offset >= total_results:
             next_offset = ''
