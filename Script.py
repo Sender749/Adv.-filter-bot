@@ -13,30 +13,39 @@ sᴇɴᴅ ᴍᴇ ᴀɴʏ ᴍᴏᴠɪᴇ ᴏʀ sᴇʀɪᴇs ɴᴀᴍᴇ ᴀɴᴅ 
 
 ɴᴏᴛᴇ - ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ᴡᴏʀᴋ ɪɴ ʙᴏᴛʜ ɢʀᴏᴜᴘs ᴀɴᴅ ʙᴏᴛ ᴘᴍ</b>"""
 
-    ADMIN_CMD_TXT = """<b>📚 ʜᴇʀᴇ ᴀʀᴇ ᴍʏ ᴄᴏᴍᴍᴀɴᴅꜱ ʟɪꜱᴛ ꜰᴏʀ ᴀʟʟ ʙᴏᴛ ᴀᴅᴍɪɴꜱ ⇊</b>
+    ADMIN_CMD_TXT = """<b>📚 ᴀᴅᴍɪɴ ᴄᴏᴍᴍᴀɴᴅꜱ</b>
 
-• /start - <code>ᴛᴏ ᴜꜱᴇ ᴍʏ ꜰᴇᴀᴛᴜʀᴇꜱ.</code>
-• /stats - <code>ɢᴇᴛ ᴛʜᴇ ᴛᴏᴛᴀʟ ᴜꜱᴇʀꜱ ᴀɴᴅ ᴄʜᴀᴛꜱ.</code>
-• /del_msg - <code>ʀᴇᴍᴏᴠᴇ ғɪʟᴇ ɴᴀᴍᴇ ᴄᴏʟʟᴇᴄᴛɪᴏɴ ɴᴏтɪғɪᴄᴀᴛɪᴏɴ...</code>
-• /movie_update - <code>ᴏɴ / ᴏғғ ᴀᴄᴄᴏʀᴅɪɴɢ ʏᴏᴜʀ ɴᴇᴇᴅᴇᴅ...</code> 
-• /pm_search - <code>ᴘᴍ sᴇᴀʀᴄʜ ᴏɴ / ᴏғғ ᴀᴄᴄᴏʀᴅɪɴɢ ʏᴏᴜʀ ɴᴇᴇᴅᴇᴅ...</code>
-• /auto_filter - <code>ᴀᴜᴛᴏ ғɪʟᴛᴇʀ ᴏɴ / ᴏғғ ᴀᴄᴄᴏʀᴅɪɴɢ ʏᴏᴜʀ ɴᴇᴇᴅᴇᴅ...</code>
-• /delete - <code>ᴅᴇʟᴇᴛᴇ ᴀ ꜱᴘᴇᴄɪꜰɪᴄ ꜰɪʟᴇ ꜰʀᴏᴍ ᴅʙ.</code>
-• /users - <code>ɢᴇᴛ ʟɪꜱᴛ ᴏꜰ ᴍʏ ᴜꜱᴇʀꜱ ᴀɴᴅ ɪᴅꜱ.</code>
-• /groups - <code>ɢᴇᴛ ʟɪꜱᴛ ᴏꜰ ᴍʏ ᴄʜᴀᴛꜱ ᴀɴᴅ ɪᴅꜱ.</code>
-• /leave - <code>ʟᴇᴀᴠᴇ ꜰʀᴏᴍ ᴀ ᴄʜᴀᴛ.</code>
-• /ban_grp - <code>ᴅɪꜱᴀʙʟᴇ ᴀ ᴄʜᴀᴛ.</code>
-• /unban_grp - <code>ᴇɴᴀʙʟᴇ ᴀ ᴄʜᴀᴛ.</code>
-• /ban_user - <code>ʙᴀɴ ᴀ ᴜꜱᴇʀ.</code>
-• /unban_user - <code>ᴜɴʙᴀɴ ᴀ ᴜꜱᴇʀ.</code>
-• /broadcast - <code>ʙʀᴏᴀᴅᴄᴀꜱᴛ ᴀ ᴍᴇꜱꜱᴀɢᴇ ᴛᴏ ᴀʟʟ ᴜꜱᴇʀꜱ.</code>
-• /grp_broadcast - <code>ʙʀᴏᴀᴅᴄᴀsᴛ ᴀ ᴍᴇssᴀɢᴇ ᴛᴏ ᴀʟʟ ᴄᴏɴɴᴇᴄᴛᴇᴅ ɢʀᴏᴜᴘs.</code>
-• /deleteall - <code>ᴅᴇʟᴇᴛᴇ ᴀʟʟ ғɪʟᴇs ғʀᴏᴍ ᴛʜᴇ ʙᴏᴛ's ᴅᴀᴛᴀʙᴀsᴇ.</code>
-• /send - <code>ꜱᴇɴᴅ ᴍᴇꜱꜱᴀɢᴇ ᴛᴏ ᴀ ᴘᴀʀᴛɪᴄᴜʟᴀʀ ᴜꜱᴇʀ.</code>
-• /add_premium - <code>ᴀᴅᴅ ᴀɴʏ ᴜꜱᴇʀ ᴛᴏ ᴘʀᴇᴍɪᴜᴍ.</code>
-• /remove_premium - <code>ʀᴇᴍᴏᴠᴇ ᴀɴʏ ᴜꜱᴇʀ ꜰʀᴏᴍ ᴘʀᴇᴍɪᴜᴍ.</code>
-• /premium_users - <code>ɢᴇᴛ ʟɪꜱᴛ ᴏꜰ ᴘʀᴇᴍɪᴜᴍ ᴜꜱᴇʀꜱ.</code>
-• /check_premium - <code>ɢᴇᴛ ɪɴꜰᴏ ᴏꜰ ᴀɴʏ ᴘʀᴇᴍɪᴜᴍ ᴜꜱᴇʀ.</code>"""
+<b>🔧 ʙᴀꜱɪᴄ</b>
+• /start - ᴜꜱᴇ ʙᴏᴛ ꜰᴇᴀᴛᴜʀᴇꜱ
+• /stats - ᴛᴏᴛᴀʟ ᴜꜱᴇʀꜱ & ᴄʜᴀᴛꜱ
+• /del_msg - ʀᴇᴍᴏᴠᴇ ꜰɪʟᴇ ɴᴀᴍᴇ ɴᴏᴛɪꜰɪᴄᴀᴛɪᴏɴ
+• /delete - ᴅᴇʟᴇᴛᴇ ꜱᴘᴇᴄɪꜰɪᴄ ꜰɪʟᴇ
+• /deleteall - ᴅᴇʟᴇᴛᴇ ᴀʟʟ ꜰɪʟᴇꜱ
+
+<b>⚙️ ꜱᴇᴛᴛɪɴɢꜱ</b>
+• /movie_update - ᴏɴ/ᴏꜰꜰ ᴜᴘᴅᴀᴛᴇꜱ
+• /pm_search - ᴏɴ/ᴏꜰꜰ ᴘᴍ ꜱᴇᴀʀᴄʜ
+• /auto_filter - ᴏɴ/ᴏꜰꜰ ᴀᴜᴛᴏ ꜰɪʟᴛᴇʀ
+
+<b>👥 ᴜꜱᴇʀꜱ & ɢʀᴏᴜᴘꜱ</b>
+• /users - ᴜꜱᴇʀ ʟɪꜱᴛ & ɪᴅꜱ
+• /groups - ɢʀᴏᴜᴘ ʟɪꜱᴛ & ɪᴅꜱ
+• /leave - ʟᴇᴀᴠᴇ ᴄʜᴀᴛ
+• /ban_grp - ᴅɪꜱᴀʙʟᴇ ᴄʜᴀᴛ
+• /unban_grp - ᴇɴᴀʙʟᴇ ᴄʜᴀᴛ
+• /ban_user - ʙᴀɴ ᴜꜱᴇʀ
+• /unban_user - ᴜɴʙᴀɴ ᴜꜱᴇʀ
+
+<b>📢 ᴍᴇꜱꜱᴀɢɪɴɢ</b>
+• /broadcast - ᴍꜱɢ ᴛᴏ ᴀʟʟ ᴜꜱᴇʀꜱ
+• /grp_broadcast - ᴍꜱɢ ᴛᴏ ᴀʟʟ ɢʀᴏᴜᴘꜱ
+• /send - ᴍꜱɢ ᴛᴏ ꜱᴘᴇᴄɪꜰɪᴄ ᴜꜱᴇʀ
+
+<b>💎 ᴘʀᴇᴍɪᴜᴍ</b>
+• /add_premium - ᴀᴅᴅ ᴘʀᴇᴍɪᴜᴍ
+• /remove_premium - ʀᴇᴍᴏᴠᴇ ᴘʀᴇᴍɪᴜᴍ
+• /premium_users - ᴘʀᴇᴍɪᴜᴍ ʟɪꜱᴛ
+• /check_premium - ᴄʜᴇᴄᴋ ᴘʀᴇᴍɪᴜᴍ ɪɴꜰᴏ"""
 
     ABOUT_TEXT = """<blockquote><b>🤖 ᴍʏ ɴᴀᴍᴇ: {}
 ⚙️ ʜᴏsᴛᴇᴅ ᴏɴ : <a href="https://www.heroku.com/">ʜᴇʀᴏᴋᴜ</a>
