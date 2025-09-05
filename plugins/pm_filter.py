@@ -214,22 +214,25 @@ async def seasons_cb_handler(client: Client, query: CallbackQuery):
     _, key, offset, req = query.data.split("#")
     if int(req) != query.from_user.id:
         return await query.answer(script.ALRT_TXT, show_alert=True) 
-    btn= []
-    for i in range(0, len(SEASONS)-1, 3):
-        btn.append([
+    btn = []
+    for i in range(0, len(SEASONS), 2): 
+        row = []
+        text1, cb1 = SEASONS[i]
+        row.append(
             InlineKeyboardButton(
-                text=SEASONS[i].title(),
-                callback_data=f"season_search#{SEASONS[i].lower()}#{key}#0#{offset}#{req}"
-            ),
-            InlineKeyboardButton(
-                text=SEASONS[i+1].title(),
-                callback_data=f"season_search#{SEASONS[i+1].lower()}#{key}#0#{offset}#{req}"
-            ),
-            InlineKeyboardButton(
-                text=SEASONS[i+2].title(),
-                callback_data=f"season_search#{SEASONS[i+2].lower()}#{key}#0#{offset}#{req}"
-            ),
-        ])
+                text=text1,
+                callback_data=f"season_search#{cb1}#{key}#0#{offset}#{req}"
+            )
+        )
+        if i + 1 < len(SEASONS):
+            text2, cb2 = SEASONS[i + 1]
+            row.append(
+                InlineKeyboardButton(
+                    text=text2,
+                    callback_data=f"season_search#{cb2}#{key}#0#{offset}#{req}"
+                )
+            )
+        btn.append(row)
     offset = 0
     btn.append([InlineKeyboardButton(text="⪻ ʙᴀᴄᴋ ᴛᴏ ᴍᴀɪɴ ᴘᴀɢᴇ", callback_data=f"next_{req}_{key}_{offset}")])
     await query.message.edit_text("<b>ɪɴ ᴡʜɪᴄʜ sᴇᴀsᴏɴ ᴅᴏ ʏᴏᴜ ᴡᴀɴᴛ, ᴄʜᴏᴏsᴇ ꜰʀᴏᴍ ʜᴇʀᴇ ↓↓</b>", reply_markup=InlineKeyboardMarkup(btn))
@@ -237,42 +240,50 @@ async def seasons_cb_handler(client: Client, query: CallbackQuery):
 
 @Client.on_callback_query(filters.regex(r"^season_search#"))
 async def season_search(client: Client, query: CallbackQuery):
-    _, season, key, offset, orginal_offset, req = query.data.split("#")
-    seas = int(season.split(' ', 1)[1])
-    if seas < 10:
-        seas = f'S0{seas}'
-    else:
-        seas = f'S{seas}'
-
+    _, season, key, offset, original_offset, req = query.data.split("#")
     if int(req) != query.from_user.id:
         return await query.answer(script.ALRT_TXT, show_alert=True)
-    offset = int(offset)
+    current_offset = int(offset)
     search = BUTTONS.get(key)
     cap = CAP.get(key)
     if not search:
         await query.answer(script.OLD_ALRT_TXT.format(query.from_user.first_name), show_alert=True)
         return
     search = search.replace("_", " ")
-    files, n_offset, total = await get_search_results(f"{search} {seas}", max_results=int(MAX_BTN), offset=offset)
-    files2, n_offset2, total2 = await get_search_results(f"{search} {season}", max_results=int(MAX_BTN), offset=offset)
-    total += total2
     try:
-        n_offset = int(n_offset)
-    except:
-        try:
-            n_offset = int(n_offset2)
-        except:
-            n_offset = 0
-    # Changed attribute access to dictionary key access:
-    files = [file for file in files if re.search(seas, file['file_name'], re.IGNORECASE)]
+        seas_num = int(season[1:])  # Extract number from "s01" -> 1
+        seas = f"S0{seas_num}" if seas_num < 10 else f"S{seas_num}"
+    except (ValueError, IndexError):
+        await query.answer("Invalid season format in callback data.", show_alert=True)
+        return
 
-    if not files:
-        files = [file for file in files2 if re.search(season, file['file_name'], re.IGNORECASE)]
-        if not files:
-            await query.answer(f"sᴏʀʀʏ {season.title()} ɴᴏᴛ ꜰᴏᴜɴᴅ ꜰᴏʀ {search}", show_alert=1)
-            return
+    filtered_files = []
+    filtered_total = 0
+    n_offset = current_offset
+    max_fetches = 10  
+    fetch_count = 0
+    while len(filtered_files) < int(MAX_BTN) and n_offset is not None and fetch_count < max_fetches:
+        batch_files, next_offset, batch_total = await get_search_results(search, max_results=int(MAX_BTN), offset=n_offset)
+        batch_filtered = [file for file in batch_files if re.search(seas, file['file_name'], re.IGNORECASE) or re.search(season, file['file_name'], re.IGNORECASE)]
+        filtered_files.extend(batch_filtered)
+        filtered_total += len(batch_filtered)
+        n_offset = int(next_offset) if next_offset and next_offset != '' else None
+        fetch_count += 1
+    filtered_files = filtered_files[:int(MAX_BTN)]
+    while n_offset is not None and fetch_count < max_fetches:
+        batch_files, next_offset, batch_total = await get_search_results(search, max_results=int(MAX_BTN), offset=n_offset)
+        batch_filtered_count = len([file for file in batch_files if re.search(seas, file['file_name'], re.IGNORECASE) or re.search(season, file['file_name'], re.IGNORECASE)])
+        filtered_total += batch_filtered_count
+        n_offset = int(next_offset) if next_offset and next_offset != '' else None
+        fetch_count += 1
 
-    batch_ids = files
+    has_more = n_offset is not None or filtered_total > current_offset + len(filtered_files)
+
+    if not filtered_files:
+        await query.answer(f"sᴏʀʀʏ {season.title()} ɴᴏᴛ ꜰᴏᴜɴᴅ ꜰᴏʀ {search}", show_alert=1)
+        return  # Do not edit message, just show alert and exit
+
+    batch_ids = filtered_files
     temp.FILES_ID[f"{query.message.chat.id}-{query.id}"] = batch_ids
     batch_link = f"batchfiles#{query.message.chat.id}#{query.id}#{query.from_user.id}"
     reqnxt = query.from_user.id if query.from_user else 0
@@ -282,7 +293,7 @@ async def season_search(client: Client, query: CallbackQuery):
     links = ""
     if settings["link"]:
         btn = []
-        for file_num, file in enumerate(files, start=offset+1):
+        for file_num, file in enumerate(filtered_files, start=current_offset + 1):
             links += f"""<b>\n\n{file_num}. <a href=https://t.me/{temp.U_NAME}?start=file_{query.message.chat.id}_{file['_id']}>[{get_size(file['file_size'])}] {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file['file_name'].split()))}</a></b>"""
     else:
         btn = [[
@@ -290,7 +301,7 @@ async def season_search(client: Client, query: CallbackQuery):
                 text=f"🔗 {get_size(file['file_size'])}≽ {formate_file_name(file['file_name'])}",
                 callback_data=f'files#{reqnxt}#{file["_id"]}'
             ),
-        ] for file in files]
+        ] for file in filtered_files]
 
     btn.insert(0, [
         InlineKeyboardButton("• ǫᴜᴀʟɪᴛʏ •", callback_data=f"qualities#{key}#{offset}#{req}"),
@@ -300,27 +311,32 @@ async def season_search(client: Client, query: CallbackQuery):
         InlineKeyboardButton("• sᴇɴᴅ ᴀʟʟ •", callback_data=batch_link),
     ])
 
-    if n_offset == '':
+    page_num = math.ceil(current_offset / int(MAX_BTN)) + 1
+    total_pages = math.ceil(filtered_total / int(MAX_BTN)) if filtered_total > 0 else 1  
+
+    if not has_more:
         btn.append(
             [InlineKeyboardButton(text="🚸 ɴᴏ ᴍᴏʀᴇ ᴘᴀɢᴇs 🚸", callback_data="buttons")]
         )
-    elif n_offset == 0:
-        btn.append(
-            [InlineKeyboardButton("⪻ ʙᴀᴄᴋ", callback_data=f"season_search#{season}#{key}#{offset - int(MAX_BTN)}#{orginal_offset}#{req}"),
-             InlineKeyboardButton(f"{math.ceil(offset / int(MAX_BTN)) + 1}/{math.ceil(total / int(MAX_BTN))}", callback_data="pages"),
-            ])
-    elif offset == 0:
-        btn.append(
-            [InlineKeyboardButton(f"{math.ceil(offset / int(MAX_BTN)) + 1}/{math.ceil(total / int(MAX_BTN))}", callback_data="pages"),
-             InlineKeyboardButton("ɴᴇxᴛ ⪼", callback_data=f"season_search#{season}#{key}#{n_offset}#{orginal_offset}#{req}"),])
     else:
-        btn.append(
-            [InlineKeyboardButton("⪻ ʙᴀᴄᴋ", callback_data=f"season_search#{season}#{key}#{offset - int(MAX_BTN)}#{orginal_offset}#{req}"),
-             InlineKeyboardButton(f"{math.ceil(offset / int(MAX_BTN)) + 1}/{math.ceil(total / int(MAX_BTN))}", callback_data="pages"),
-             InlineKeyboardButton("ɴᴇxᴛ ⪼", callback_data=f"season_search#{season}#{key}#{n_offset}#{orginal_offset}#{req}"),])
+        pagination_row = []
+        if current_offset > 0:
+            back_offset = max(0, current_offset - int(MAX_BTN))
+            pagination_row.append(
+                InlineKeyboardButton("⪻ ʙᴀᴄᴋ", callback_data=f"season_search#{season}#{key}#{back_offset}#{original_offset}#{req}")
+            )
+        pagination_row.append(
+            InlineKeyboardButton(f"{page_num}/{total_pages}", callback_data="pages")
+        )
+        if has_more:
+            next_offset = current_offset + int(MAX_BTN)
+            pagination_row.append(
+                InlineKeyboardButton("ɴᴇxᴛ ⪼", callback_data=f"season_search#{season}#{key}#{next_offset}#{original_offset}#{req}")
+            )
+        btn.append(pagination_row)
 
     btn.append([
-        InlineKeyboardButton(text="⪻ ʙᴀᴄᴋ ᴛᴏ ᴍᴀɪɴ ᴘᴀɢᴇ", callback_data=f"next_{req}_{key}_{orginal_offset}"),
+        InlineKeyboardButton(text="⪻ ʙᴀᴄᴋ ᴛᴏ ᴍᴀɪɴ ᴘᴀɢᴇ", callback_data=f"next_{req}_{key}_{original_offset}"),
     ])
     await query.message.edit_text(cap + links + del_msg, disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML, reply_markup=InlineKeyboardMarkup(btn))
     return
@@ -330,22 +346,23 @@ async def quality_cb_handler(client: Client, query: CallbackQuery):
     _, key, offset, req = query.data.split("#")
     if int(req) != query.from_user.id:
         return await query.answer(script.ALRT_TXT, show_alert=True)
-    btn= []
-    for i in range(0, len(QUALITIES)-1, 3):
-        btn.append([
+    btn = []
+    for i in range(0, len(QUALITIES), 2): 
+        row = []
+        row.append(
             InlineKeyboardButton(
                 text=QUALITIES[i].title(),
                 callback_data=f"quality_search#{QUALITIES[i].lower()}#{key}#0#{offset}#{req}"
-            ),
-            InlineKeyboardButton(
-                text=QUALITIES[i+1].title(),
-                callback_data=f"quality_search#{QUALITIES[i+1].lower()}#{key}#0#{offset}#{req}"
-            ),
-            InlineKeyboardButton(
-                text=QUALITIES[i+2].title(),
-                callback_data=f"quality_search#{QUALITIES[i+2].lower()}#{key}#0#{offset}#{req}"
-            ),
-        ])
+            )
+        )
+        if i + 1 < len(QUALITIES):
+            row.append(
+                InlineKeyboardButton(
+                    text=QUALITIES[i + 1].title(),
+                    callback_data=f"quality_search#{QUALITIES[i + 1].lower()}#{key}#0#{offset}#{req}"
+                )
+            )
+        btn.append(row)
     offset = 0
     btn.append([InlineKeyboardButton(text="⪻ ʙᴀᴄᴋ ᴛᴏ ᴍᴀɪɴ ᴘᴀɢᴇ", callback_data=f"next_{req}_{key}_{offset}")])
     await query.message.edit_text("<b>ɪɴ ᴡʜɪᴄʜ ǫᴜᴀʟɪᴛʏ ᴅᴏ ʏᴏᴜ ᴡᴀɴᴛ, ᴄʜᴏᴏsᴇ ꜰʀᴏᴍ ʜᴇʀᴇ ↓↓</b>", reply_markup=InlineKeyboardMarkup(btn))
@@ -353,27 +370,45 @@ async def quality_cb_handler(client: Client, query: CallbackQuery):
 
 @Client.on_callback_query(filters.regex(r"^quality_search#"))
 async def quality_search(client: Client, query: CallbackQuery):
-    _, qul, key, offset, orginal_offset, req = query.data.split("#")
+    _, qul, key, offset, original_offset, req = query.data.split("#")
     if int(req) != query.from_user.id:
         return await query.answer(script.ALRT_TXT, show_alert=True)        
-    offset = int(offset)
+    current_offset = int(offset)
     search = BUTTONS.get(key)
     cap = CAP.get(key)
     if not search:
         await query.answer(script.OLD_ALRT_TXT.format(query.from_user.first_name), show_alert=True)
         return 
     search = search.replace("_", " ")
-    files, n_offset, total = await get_search_results(f"{search} {qul}", max_results=int(MAX_BTN), offset=offset)
-    try:
-        n_offset = int(n_offset)
-    except:
-        n_offset = 0
-    files = [file for file in files if re.search(qul, file['file_name'], re.IGNORECASE)]
-    if not files:
-        await query.answer(f"sᴏʀʀʏ ǫᴜᴀʟɪᴛʏ {qul.title()} ɴᴏᴛ ꜰᴏᴜɴᴅ ꜰᴏʀ {search}", show_alert=1)
-        return
 
-    batch_ids = files
+    filtered_files = []
+    filtered_total = 0
+    n_offset = current_offset
+    max_fetches = 10  
+    fetch_count = 0
+    while len(filtered_files) < int(MAX_BTN) and n_offset is not None and fetch_count < max_fetches:
+        batch_files, next_offset, batch_total = await get_search_results(search, max_results=int(MAX_BTN), offset=n_offset)
+        batch_filtered = [file for file in batch_files if re.search(qul, file['file_name'], re.IGNORECASE)]
+        filtered_files.extend(batch_filtered)
+        filtered_total += len(batch_filtered)
+        n_offset = int(next_offset) if next_offset and next_offset != '' else None
+        fetch_count += 1
+
+    filtered_files = filtered_files[:int(MAX_BTN)]
+    while n_offset is not None and fetch_count < max_fetches:
+        batch_files, next_offset, batch_total = await get_search_results(search, max_results=int(MAX_BTN), offset=n_offset)
+        batch_filtered_count = len([file for file in batch_files if re.search(qul, file['file_name'], re.IGNORECASE)])
+        filtered_total += batch_filtered_count
+        n_offset = int(next_offset) if next_offset and next_offset != '' else None
+        fetch_count += 1
+
+    has_more = n_offset is not None or filtered_total > current_offset + len(filtered_files)
+
+    if not filtered_files:
+        await query.answer(f"sᴏʀʀʏ {qul.title()} ɴᴏᴛ ꜰᴏᴜɴᴅ ꜰᴏʀ {search}", show_alert=1)
+        return  
+
+    batch_ids = filtered_files
     temp.FILES_ID[f"{query.message.chat.id}-{query.id}"] = batch_ids
     batch_link = f"batchfiles#{query.message.chat.id}#{query.id}#{query.from_user.id}"
 
@@ -384,12 +419,12 @@ async def quality_search(client: Client, query: CallbackQuery):
     links = ""
     if settings["link"]:
         btn = []
-        for file_num, file in enumerate(files, start=offset+1):
+        for file_num, file in enumerate(filtered_files, start=current_offset + 1):
             links += f"""<b>\n\n{file_num}. <a href=https://t.me/{temp.U_NAME}?start=file_{query.message.chat.id}_{file['_id']}>[{get_size(file['file_size'])}] {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file['file_name'].split()))}</a></b>"""
     else:
         btn = [[
                 InlineKeyboardButton(text=f"🔗 {get_size(file['file_size'])}≽ {formate_file_name(file['file_name'])}", callback_data=f'files#{reqnxt}#{file["_id"]}'),
-              ] for file in files
+              ] for file in filtered_files
               ]
 
     btn.insert(0, [
@@ -399,27 +434,33 @@ async def quality_search(client: Client, query: CallbackQuery):
     btn.insert(1, [
         InlineKeyboardButton("• sᴇɴᴅ ᴀʟʟ •", callback_data=batch_link),
     ])
-    if n_offset == '':
+
+    page_num = math.ceil(current_offset / int(MAX_BTN)) + 1
+    total_pages = math.ceil(filtered_total / int(MAX_BTN)) if filtered_total > 0 else 1  
+
+    if not has_more:
         btn.append(
             [InlineKeyboardButton(text="🚸 ɴᴏ ᴍᴏʀᴇ ᴘᴀɢᴇs 🚸", callback_data="buttons")]
         )
-    elif n_offset == 0:
-        btn.append(
-            [InlineKeyboardButton("⪻ ʙᴀᴄᴋ", callback_data=f"quality_search#{qul}#{key}#{offset- int(MAX_BTN)}#{orginal_offset}#{req}"),
-             InlineKeyboardButton(f"{math.ceil(offset / int(MAX_BTN)) + 1}/{math.ceil(total / int(MAX_BTN))}", callback_data="pages",),
-            ])
-    elif offset == 0:
-        btn.append(
-            [InlineKeyboardButton(f"{math.ceil(offset / int(MAX_BTN)) + 1}/{math.ceil(total / int(MAX_BTN))}", callback_data="pages",),
-             InlineKeyboardButton("ɴᴇxᴛ ⪼", callback_data=f"quality_search#{qul}#{key}#{n_offset}#{orginal_offset}#{req}"),])
     else:
-        btn.append(
-            [InlineKeyboardButton("⪻ ʙᴀᴄᴋ", callback_data=f"quality_search#{qul}#{key}#{offset- int(MAX_BTN)}#{orginal_offset}#{req}"),
-             InlineKeyboardButton(f"{math.ceil(offset / int(MAX_BTN)) + 1}/{math.ceil(total / int(MAX_BTN))}", callback_data="pages",),
-             InlineKeyboardButton("ɴᴇxᴛ ⪼", callback_data=f"quality_search#{qul}#{key}#{n_offset}#{orginal_offset}#{req}"),])
+        pagination_row = []
+        if current_offset > 0:
+            back_offset = max(0, current_offset - int(MAX_BTN))
+            pagination_row.append(
+                InlineKeyboardButton("⪻ ʙᴀᴄᴋ", callback_data=f"quality_search#{qul}#{key}#{back_offset}#{original_offset}#{req}")
+            )
+        pagination_row.append(
+            InlineKeyboardButton(f"{page_num}/{total_pages}", callback_data="pages")
+        )
+        if has_more:
+            next_offset = current_offset + int(MAX_BTN)
+            pagination_row.append(
+                InlineKeyboardButton("ɴᴇxᴛ ⪼", callback_data=f"quality_search#{qul}#{key}#{next_offset}#{original_offset}#{req}")
+            )
+        btn.append(pagination_row)
 
     btn.append([
-        InlineKeyboardButton(text="⪻ ʙᴀᴄᴋ ᴛᴏ ᴍᴀɪɴ ᴘᴀɢᴇ", callback_data=f"next_{req}_{key}_{orginal_offset}"),])
+        InlineKeyboardButton(text="⪻ ʙᴀᴄᴋ ᴛᴏ ᴍᴀɪɴ ᴘᴀɢᴇ", callback_data=f"next_{req}_{key}_{original_offset}"),])
     await query.message.edit_text(cap + links + del_msg, disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML, reply_markup=InlineKeyboardMarkup(btn))
     return
 
@@ -428,18 +469,25 @@ async def languages_cb_handler(client: Client, query: CallbackQuery):
     _, key, offset, req = query.data.split("#")
     if int(req) != query.from_user.id:
         return await query.answer(script.ALRT_TXT, show_alert=True)
-    btn  = []
-    for i in range(0, len(LANGUAGES)-1, 2):
-        btn.append([
+    btn = []
+    for i in range(0, len(LANGUAGES), 2): 
+        row = []
+        text1, cb1 = LANGUAGES[i]
+        row.append(
             InlineKeyboardButton(
-                text=LANGUAGES[i].title(),
-                callback_data=f"lang_search#{LANGUAGES[i].lower()}#{key}#0#{offset}#{req}"
-            ),
-            InlineKeyboardButton(
-                text=LANGUAGES[i+1].title(),
-                callback_data=f"lang_search#{LANGUAGES[i+1].lower()}#{key}#0#{offset}#{req}"
-            ),
-                    ])
+                text=text1,
+                callback_data=f"lang_search#{cb1}#{key}#0#{offset}#{req}"
+            )
+        )
+        if i + 1 < len(LANGUAGES):
+            text2, cb2 = LANGUAGES[i + 1]
+            row.append(
+                InlineKeyboardButton(
+                    text=text2,
+                    callback_data=f"lang_search#{cb2}#{key}#0#{offset}#{req}"
+                )
+            )
+        btn.append(row)
     offset = 0
     btn.append([InlineKeyboardButton(text="⪻ ʙᴀᴄᴋ ᴛᴏ ᴍᴀɪɴ ᴘᴀɢᴇ", callback_data=f"next_{req}_{key}_{offset}")])
     await query.message.edit_text("<b>ɪɴ ᴡʜɪᴄʜ ʟᴀɴɢᴜᴀɢᴇ ᴅᴏ ʏᴏᴜ ᴡᴀɴᴛ, ᴄʜᴏᴏsᴇ ꜰʀᴏᴍ ʜᴇʀᴇ ↓↓</b>", reply_markup=InlineKeyboardMarkup(btn))
@@ -447,35 +495,47 @@ async def languages_cb_handler(client: Client, query: CallbackQuery):
 
 @Client.on_callback_query(filters.regex(r"^lang_search#"))
 async def lang_search(client: Client, query: CallbackQuery):
-    _, lang, key, offset, orginal_offset, req = query.data.split("#")
+    _, lang, key, offset, original_offset, req = query.data.split("#")
     lang2 = lang[:3]
     if int(req) != query.from_user.id:
         return await query.answer(script.ALRT_TXT, show_alert=True)
-    offset = int(offset)
+    current_offset = int(offset)
     search = BUTTONS.get(key)
     cap = CAP.get(key)
     if not search:
         await query.answer(script.OLD_ALRT_TXT.format(query.from_user.first_name), show_alert=True)
         return
     search = search.replace("_", " ")
-    files, n_offset, total = await get_search_results(f"{search} {lang}", max_results=int(MAX_BTN), offset=offset)
-    files2, n_offset2, total2 = await get_search_results(f"{search} {lang2}", max_results=int(MAX_BTN), offset=offset)
-    total += total2
-    try:
-        n_offset = int(n_offset)
-    except:
-        try:
-            n_offset = int(n_offset2)
-        except:
-            n_offset = 0
-    # Fix dictionary key access:
-    files = [file for file in files if re.search(lang, file['file_name'], re.IGNORECASE)]
-    if not files:
-        files = [file for file in files2 if re.search(lang2, file['file_name'], re.IGNORECASE)]
-        if not files:
-            return await query.answer(f"sᴏʀʀʏ ʟᴀɴɢᴜᴀɢᴇ {lang.title()} ɴᴏᴛ ꜰᴏᴜɴᴅ ꜰᴏʀ {search}", show_alert=1)
 
-    batch_ids = files
+    filtered_files = []
+    total = 0
+    n_offset = current_offset
+    while len(filtered_files) < int(MAX_BTN) and n_offset is not None:
+        batch_files1, next_offset1, batch_total1 = await get_search_results(search, max_results=int(MAX_BTN), offset=n_offset)
+        batch_files2, next_offset2, batch_total2 = await get_search_results(search, max_results=int(MAX_BTN), offset=n_offset)
+        total += batch_total1 + batch_total2
+
+        batch_filtered1 = [file for file in batch_files1 if re.search(lang, file['file_name'], re.IGNORECASE)]
+        batch_filtered2 = [file for file in batch_files2 if re.search(lang2, file['file_name'], re.IGNORECASE)]
+
+        batch_filtered = batch_filtered1 + batch_filtered2
+        filtered_files.extend(batch_filtered)
+
+        if next_offset1 and next_offset1 != '':
+            n_offset = int(next_offset1)
+        elif next_offset2 and next_offset2 != '':
+            n_offset = int(next_offset2)
+        else:
+            n_offset = None
+
+    filtered_files = filtered_files[:int(MAX_BTN)]
+    has_more = n_offset is not None
+
+    if not filtered_files:
+        await query.answer(f"sᴏʀʀʏ ʟᴀɴɢᴜᴀɢᴇ {lang.title()} ɴᴏᴛ ꜰᴏᴜɴᴅ ꜰᴏʀ {search}", show_alert=1)
+        return 
+
+    batch_ids = filtered_files
     temp.FILES_ID[f"{query.message.chat.id}-{query.id}"] = batch_ids
     batch_link = f"batchfiles#{query.message.chat.id}#{query.id}#{query.from_user.id}"
 
@@ -487,12 +547,12 @@ async def lang_search(client: Client, query: CallbackQuery):
     links = ""
     if settings["link"]:
         btn = []
-        for file_num, file in enumerate(files, start=offset+1):
+        for file_num, file in enumerate(filtered_files, start=current_offset + 1):
             links += f"""<b>\n\n{file_num}. <a href=https://t.me/{temp.U_NAME}?start=file_{group_id}_{file['_id']}>[{get_size(file['file_size'])}] {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file['file_name'].split()))}</a></b>"""
     else:
         btn = [[
             InlineKeyboardButton(text=f"🔗 {get_size(file['file_size'])}≽ {formate_file_name(file['file_name'])}", callback_data=f'files#{reqnxt}#{file["_id"]}'),
-          ] for file in files
+          ] for file in filtered_files
         ]
 
     btn.insert(0, [
@@ -503,34 +563,32 @@ async def lang_search(client: Client, query: CallbackQuery):
         InlineKeyboardButton("• sᴇɴᴅ ᴀʟʟ •", callback_data=batch_link),
     ])
 
-    if n_offset == '':
+    page_num = math.ceil(current_offset / int(MAX_BTN)) + 1
+    total_pages = math.ceil(total / int(MAX_BTN)) if total > 0 else 1
+
+    if not has_more:
         btn.append(
             [InlineKeyboardButton(text="🚸 ɴᴏ ᴍᴏʀᴇ ᴘᴀɢᴇs 🚸", callback_data="buttons")]
         )
-    elif n_offset == 0:
-        btn.append(
-            [
-                InlineKeyboardButton("⪻ ʙᴀᴄᴋ", callback_data=f"lang_search#{lang}#{key}#{offset - int(MAX_BTN)}#{orginal_offset}#{req}"),
-                InlineKeyboardButton(f"{math.ceil(offset / int(MAX_BTN)) + 1}/{math.ceil(total / int(MAX_BTN))}", callback_data="pages"),
-            ]
-        )
-    elif offset == 0:
-        btn.append(
-            [
-                InlineKeyboardButton(f"{math.ceil(offset / int(MAX_BTN)) + 1}/{math.ceil(total / int(MAX_BTN))}", callback_data="pages"),
-                InlineKeyboardButton("ɴᴇxᴛ ⪼", callback_data=f"lang_search#{lang}#{key}#{n_offset}#{orginal_offset}#{req}"),
-            ]
-        )
     else:
-        btn.append(
-            [
-                InlineKeyboardButton("⪻ ʙᴀᴄᴋ", callback_data=f"lang_search#{lang}#{key}#{offset - int(MAX_BTN)}#{orginal_offset}#{req}"),
-                InlineKeyboardButton(f"{math.ceil(offset / int(MAX_BTN)) + 1}/{math.ceil(total / int(MAX_BTN))}", callback_data="pages"),
-                InlineKeyboardButton("ɴᴇxᴛ ⪼", callback_data=f"lang_search#{lang}#{key}#{n_offset}#{orginal_offset}#{req}"),
-            ]
+        pagination_row = []
+        if current_offset > 0:
+            back_offset = max(0, current_offset - int(MAX_BTN))
+            pagination_row.append(
+                InlineKeyboardButton("⪻ ʙᴀᴄᴋ", callback_data=f"lang_search#{lang}#{key}#{back_offset}#{original_offset}#{req}")
+            )
+        pagination_row.append(
+            InlineKeyboardButton(f"{page_num}/{total_pages}", callback_data="pages")
         )
+        if has_more:
+            next_offset = current_offset + int(MAX_BTN)
+            pagination_row.append(
+                InlineKeyboardButton("ɴᴇxᴛ ⪼", callback_data=f"lang_search#{lang}#{key}#{next_offset}#{original_offset}#{req}")
+            )
+        btn.append(pagination_row)
+
     btn.append([
-        InlineKeyboardButton(text="⪻ ʙᴀᴄᴋ ᴛᴏ ᴍᴀɪɴ ᴘᴀɢᴇ", callback_data=f"next_{req}_{key}_{orginal_offset}"),
+        InlineKeyboardButton(text="⪻ ʙᴀᴄᴋ ᴛᴏ ᴍᴀɪɴ ᴘᴀɢᴇ", callback_data=f"next_{req}_{key}_{original_offset}"),
     ])
     await query.message.edit_text(
         cap + links + del_msg, 
