@@ -466,21 +466,24 @@ async def quality_search(client: Client, query: CallbackQuery):
 
 @Client.on_callback_query(filters.regex(r"^languages#"))
 async def languages_cb_handler(client: Client, query: CallbackQuery):
-    _, key, offset, req = query.data.split("#")
-    if int(req) != query.from_user.id:
-        return await query.answer(script.ALRT_TXT, show_alert=True)
-    
-    btn = [[
-        InlineKeyboardButton(text1, callback_data=f"lang_search#{cb1}#{key}#0#{offset}#{req}"),
-        *([] if i + 1 >= len(LANGUAGES) else [InlineKeyboardButton(text2, callback_data=f"lang_search#{cb2}#{key}#0#{offset}#{req}")])
-    ] for i in range(0, len(LANGUAGES), 2) for (text1, cb1), (text2, cb2) in [LANGUAGES[i:i+2] + [("", "")]][:1]]
-    
-    btn.append([InlineKeyboardButton("⪻ ʙᴀᴄᴋ ᴛᴏ ᴍᴀɪɴ ᴘᴀɢᴇ", callback_data=f"next_{req}_{key}_0")])
-    
-    await query.message.edit_text(
-        "<b>ɪɴ ᴡʜɪᴄʜ ʟᴀɴɢᴜᴀɢᴇ ᴅᴏ ʏᴏᴜ ᴡᴀɴᴛ, ᴄʜᴏᴏsᴇ ꜰʀᴏᴍ ʜᴇʀᴇ ↓↓</b>", 
-        reply_markup=InlineKeyboardMarkup(btn)
-    )
+    try:
+        _, key, offset, req = query.data.split("#")
+        if int(req) != query.from_user.id:
+            return await query.answer(script.ALRT_TXT, show_alert=True)
+        
+        btn = []
+        for i in range(0, len(LANGUAGES), 2):
+            row = [InlineKeyboardButton(LANGUAGES[i][0], callback_data=f"lang_search#{LANGUAGES[i][1]}#{key}#0#{offset}#{req}")]
+            if i + 1 < len(LANGUAGES):
+                row.append(InlineKeyboardButton(LANGUAGES[i+1][0], callback_data=f"lang_search#{LANGUAGES[i+1][1]}#{key}#0#{offset}#{req}"))
+            btn.append(row)
+        
+        btn.append([InlineKeyboardButton("⪻ ʙᴀᴄᴋ ᴛᴏ ᴍᴀɪɴ ᴘᴀɢᴇ", callback_data=f"next_{req}_{key}_0")])
+        
+        await query.message.edit_text(
+            "<b>ɪɴ ᴡʜɪᴄʜ ʟᴀɴɢᴜᴀɢᴇ ᴅᴏ ʏᴏᴜ ᴡᴀɴᴛ, ᴄʜᴏᴏsᴇ ꜰʀᴏᴍ ʜᴇʀᴇ ↓↓</b>", 
+            reply_markup=InlineKeyboardMarkup(btn)
+        )
 
 @Client.on_callback_query(filters.regex(r"^lang_search#"))
 async def lang_search(client: Client, query: CallbackQuery):
@@ -550,6 +553,7 @@ async def lang_search(client: Client, query: CallbackQuery):
     btn.append([InlineKeyboardButton("⪻ ʙᴀᴄᴋ ᴛᴏ ᴍᴀɪɴ ᴘᴀɢᴇ", callback_data=f"next_{req}_{key}_{original_offset}")])
     
     await query.message.edit_text(cap + links + del_msg, disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML, reply_markup=InlineKeyboardMarkup(btn))
+
 
 
 @Client.on_callback_query()
