@@ -6,10 +6,10 @@ sᴇɴᴅ ᴍᴇ ᴀɴʏ ᴍᴏᴠɪᴇ ᴏʀ sᴇʀɪᴇs ɴᴀᴍᴇ ᴀɴᴅ 
 
 <blockquote>ᴍᴀɪɴᴛᴀɪɴᴇᴅ ʙʏ : <a href='https://telegram.me/Silicon_Official'>ѕιℓι¢ση σƒƒ¢ιαℓ</a></blockquote>
 </b>"""
-
+    
     HELP_TXT = """<b>ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʙᴜᴛᴛᴏɴꜱ ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ ᴅᴏᴄᴜᴍᴇɴᴛᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ ꜱᴘᴇᴄɪꜰɪᴄ ᴍᴏᴅᴜʟᴇꜱ..</b>"""
-
-    TELE_TXT = """<b>/upload - sᴇɴᴅ ᴍᴇ ᴘɪᴄᴛᴜʀᴇ ᴏʀ ᴠɪᴅᴇᴏ ᴜɴᴅᴇʀ (5ᴍʙ)
+    
+    TELE_TXT = """<b>/upload - sᴇɴᴅ ᴍᴇ ᴘɪᴄᴛᴜʀᴇ ᴏʀ ᴠɪᴅᴇᴏ ᴜɴᴅᴇʀ (𝟻ᴍʙ)
 
 ɴᴏᴛᴇ - ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ᴡᴏʀᴋ ɪɴ ʙᴏᴛʜ ɢʀᴏᴜᴘs ᴀɴᴅ ʙᴏᴛ ᴘᴍ</b>"""
 
@@ -45,7 +45,16 @@ sᴇɴᴅ ᴍᴇ ᴀɴʏ ᴍᴏᴠɪᴇ ᴏʀ sᴇʀɪᴇs ɴᴀᴍᴇ ᴀɴᴅ 
 • /add_premium - ᴀᴅᴅ ᴘʀᴇᴍɪᴜᴍ
 • /remove_premium - ʀᴇᴍᴏᴠᴇ ᴘʀᴇᴍɪᴜᴍ
 • /premium_users - ᴘʀᴇᴍɪᴜᴍ ʟɪꜱᴛ
-• /check_premium - ᴄʜᴇᴄᴋ ᴘʀᴇᴍɪᴜᴍ ɪɴꜰᴏ"""
+• /check_premium - ᴄʜᴇᴄᴋ ᴘʀᴇᴍɪᴜᴍ ɪɴꜰᴏ
+• /add_redeem - ᴀᴅᴅ ʀᴇᴅᴇᴇᴍ ᴄᴏᴅᴇ
+• /allcodes - ꜱᴇᴇ ᴀʟʟ ʀᴇᴅᴇᴇᴍ ᴄᴏᴅᴇꜱ
+• /clearcodes - ᴄʟᴇᴀʀ ᴀʟʟ ʀᴇᴅᴇᴇᴍ ᴄᴏᴅᴇꜱ
+
+<b>📊 ꜰɪʟᴇ ʟɪᴍɪᴛ</b>
+• /resetlimit - ʀᴇꜱᴇᴛ ᴀʟʟ ᴜꜱᴇʀꜱ ʟɪᴍɪᴛ
+• /resetuser - ʀᴇꜱᴇᴛ ꜱᴘᴇᴄɪꜰɪᴄ ᴜꜱᴇʀ ʟɪᴍɪᴛ
+• /checklimit - ᴄʜᴇᴄᴋ ᴜꜱᴇʀ ꜰɪʟᴇ ʟɪᴍɪᴛ""" 
+
 
     ABOUT_TEXT = """<blockquote><b>🤖 ᴍʏ ɴᴀᴍᴇ: {}
 ⚙️ ʜᴏsᴛᴇᴅ ᴏɴ : <a href="https://www.heroku.com/">ʜᴇʀᴏᴋᴜ</a>
@@ -125,7 +134,7 @@ sᴇɴᴅ ᴍᴇ ᴀɴʏ ᴍᴏᴠɪᴇ ᴏʀ sᴇʀɪᴇs ɴᴀᴍᴇ ᴀɴᴅ 
 📇 ɪᴅ - <code>{}</code>
 
 🎁 ʀᴇǫᴜᴇꜱᴛ ᴍꜱɢ - <code>{}</code></b>"""  
-
+    
     IMDB_TEMPLATE_TXT = """<b>📻 ᴛɪᴛʟᴇ - <a href={url}>{title}</a>
 🎭 ɢᴇɴʀᴇs - {genres}
 🎖 ʀᴀᴛɪɴɢ - <a href={url}/ratings>{rating}</a> / 10 (ʙᴀsᴇᴅ ᴏɴ {votes} ᴜsᴇʀ ʀᴀᴛɪɴɢ.)
@@ -133,7 +142,7 @@ sᴇɴᴅ ᴍᴇ ᴀɴʏ ᴍᴏᴠɪᴇ ᴏʀ sᴇʀɪᴇs ɴᴀᴍᴇ ᴀɴᴅ 
 ❗️ ʟᴀɴɢᴜᴀɢᴇ - {languages}</b>
 """
 
-    FILE_CAPTION = """<b>{file_name}\nUploaded By: <a herf="https://t.me/Silicon_Bot_Update">[Silicon Botz]</a></b>"""
+    FILE_CAPTION = """<b>{file_name}\n\nUploaded By: <a href="https://t.me/Silicon_Bot_Update">Silicon Botz</a></b>"""
 
     MOVIE_UPDATE_NOTIFY_TXT = """
 </b><a href={poster_url}>📥</a><a href={imdb_url}>New {tag} Added</a></b>
@@ -161,7 +170,7 @@ sᴇɴᴅ ᴍᴇ ᴀɴʏ ᴍᴏᴠɪᴇ ᴏʀ sᴇʀɪᴇs ɴᴀᴍᴇ ᴀɴᴅ 
     OLD_ALRT_TXT = """ʏᴏᴜ ᴀʀᴇ ᴜsɪɴɢ ᴍʏ ᴏʟᴅ ᴍᴇssᴀɢᴇs..sᴇɴᴅ ᴀ ɴᴇᴡ ʀᴇǫᴜᴇsᴛ.."""
 
     NO_RESULT_TXT = """<b>ᴛʜɪs ᴍᴇssᴀɢᴇ ɪs ɴᴏᴛ ʀᴇʟᴇᴀsᴇᴅ ᴏʀ ᴀᴅᴅᴇᴅ ɪɴ ᴍʏ ᴅᴀᴛᴀʙᴀsᴇ 🙄</b>"""
-
+    
     I_CUDNT = """<b>🤧  ʜᴇʟʟᴏ{}
 
 ɪ ᴄᴏᴜʟᴅɴ'ᴛ ꜰɪɴᴅ ᴀɴʏ ᴍᴏᴠɪᴇ ᴏʀ sᴇʀɪᴇs ᴡɪᴛʜ ᴛʜᴀᴛ ɴᴀᴍᴇ... 😐 </b>"""
@@ -169,16 +178,16 @@ sᴇɴᴅ ᴍᴇ ᴀɴʏ ᴍᴏᴠɪᴇ ᴏʀ sᴇʀɪᴇs ɴᴀᴍᴇ ᴀɴᴅ 
     I_CUD_NT = """<b>😑 ʜᴇʟʟᴏ {}
 
 ɪ ᴄᴏᴜʟᴅɴ'ᴛ ꜰɪɴᴅ ᴀɴʏᴛʜɪɴɢ ʀᴇʟᴀᴛᴇᴅ ᴛᴏ ᴛʜɪs 😞... ᴄʜᴇᴄᴋ ʏᴏᴜʀ sᴘᴇʟʟɪɴɢ.</b>"""
-
+    
     CUDNT_FND = """<b>🤧 ʜᴇʟʟᴏ {}
 
 ɪ ᴄᴏᴜʟᴅɴ'ᴛ ꜰɪɴᴅ ᴀɴʏᴛʜɪɴɢ ʀᴇʟᴀᴛᴇᴅ ᴛᴏ ᴛʜɪs ᴅɪᴅ ʏᴏᴜ ᴍᴇᴀɴ ᴀɴʏ ᴏꜰ ᴛʜᴇsᴇ?? 👇</b>"""
-
+    
     FONT_TXT= """<b>ʏᴏᴜ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴍᴏᴅᴇ ᴛᴏ ᴄʜᴀɴɢᴇ ʏᴏᴜʀ ꜰᴏɴᴛs sᴛʏʟᴇ, ᴊᴜsᴛ sᴇɴᴅ ᴍᴇ ʟɪᴋᴇ ᴛʜɪs ꜰᴏʀᴍᴀᴛ
 
 <code>/font hi how are you</code></b>"""
 
-
+    
     PREMIUM_TEXT = """<b><i><blockquote>ᴀᴠᴀɪʟᴀʙʟᴇ ᴘʟᴀɴs  ♻️</blockquote>
 
 • 𝟷 ᴡᴇᴇᴋ  -  ₹𝟹𝟶
@@ -309,3 +318,4 @@ sᴇɴᴅ ᴍᴇ ᴀɴʏ ᴍᴏᴠɪᴇ ᴏʀ sᴇʀɪᴇs ɴᴀᴍᴇ ᴀɴᴅ 
     SOURCE_TXT = """<b>ՏOᑌᖇᑕᗴ ᑕOᗪᗴ :</b> 👇
 
 ᴛʜɪs ɪs ᴀɴ ᴏᴘᴇɴ-sᴏᴜʀᴄᴇ ᴘʀᴏᴊᴇᴄᴛ. ʏᴏᴜ ᴄᴀɴ ᴜsᴇ ɪᴛ ꜰʀᴇᴇʟʏ, ʙᴜᴛ sᴇʟʟɪɴɢ ᴛʜᴇ sᴏᴜʀᴄᴇ ᴄᴏᴅᴇ ɪs sᴛʀɪᴄᴛʟʏ ᴘʀᴏʜɪʙɪᴛᴇᴅ."""
+
