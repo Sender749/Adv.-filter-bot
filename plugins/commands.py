@@ -210,15 +210,68 @@ async def start(client: Client, message):
             await log_error(client, f"❗️ Force Sub Error:\n\n{repr(e)}")
             logger.error(f"❗️ Force Sub Error:\n\n{repr(e)}")
 
-    
-
     if not await db.has_premium_access(user_id):
         grp_id = int(grp_id)
         user_verified = await db.is_user_verified(user_id)
         settings = await get_settings(grp_id)
         is_second_shortener = await db.use_second_shortener(user_id, settings.get('verify_time', TWO_VERIFY_GAP)) 
         is_third_shortener = await db.use_third_shortener(user_id, settings.get('third_verify_time', THREE_VERIFY_GAP))
-        
+
+        is_allfiles_request = data and data.startswith("allfiles")
+
+        if not is_allfiles_request and IS_FILE_LIMIT and FILES_LIMIT > 0:
+            current_file_count = silicondb.silicon_file_limit(user_id)
+
+            if current_file_count < FILES_LIMIT:
+                silicondb.increment_silicon_limit(user_id)
+                current_file_count += 1
+                
+                if not data:
+                    return
+
+                files_ = await get_file_details(file_id)           
+
+                if not files_:
+                    try:
+                        pre, file_id = (base64.urlsafe_b64decode(data + "=" * (-len(data) % 4))).decode("ascii").split("_", 1)
+                    except:
+                        pass
+                    return await message.reply('<b>⚠️ ᴀʟʟ ꜰɪʟᴇs ɴᴏᴛ ꜰᴏᴜɴᴅ ⚠️</b>')
+
+                if isinstance(files_, list) and len(files_) > 0:
+                    files = files_[0]
+                elif isinstance(files_, dict):
+                    files = files_
+                else:
+                    return await message.reply('<b>⚠️ ᴀʟʟ ꜰɪʟᴇs ɴᴏᴛ ꜰᴏᴜɴᴅ ⚠️</b>')
+
+                settings = await get_settings(grp_id)
+
+                file_limit_info = f"\n\n📊 ʏᴏᴜ ʜᴀᴠᴇ ʀᴇᴄᴇɪᴠᴇᴅ {current_file_count}/{FILES_LIMIT} ꜰʀᴇᴇ ꜰɪʟᴇs"
+                
+                f_caption = settings['caption'].format(
+                    file_name=formate_file_name(files['file_name']),
+                    file_size=get_size(files['file_size']),
+                    file_caption=files.get('caption', '')
+                ) + file_limit_info
+
+                btn = [[InlineKeyboardButton("✛ ᴡᴀᴛᴄʜ & ᴅᴏᴡɴʟᴏᴀᴅ ✛", callback_data=f'stream#{file_id}')]]
+                toDel = await client.send_cached_media(
+                    chat_id=message.from_user.id,
+                    file_id=file_id,
+                    caption=f_caption,
+                    reply_markup=InlineKeyboardMarkup(btn)
+                )
+
+                time_text = f'{FILE_AUTO_DEL_TIMER / 60} ᴍɪɴᴜᴛᴇs' if FILE_AUTO_DEL_TIMER >= 60 else f'{FILE_AUTO_DEL_TIMER} sᴇᴄᴏɴᴅs'
+                delCap = f"<b>ʏᴏᴜʀ ғɪʟᴇ ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ ᴀғᴛᴇʀ {time_text} ᴛᴏ ᴀᴠᴏɪᴅ ᴄᴏᴘʏʀɪɢʜᴛ ᴠɪᴏʟᴀᴛɪᴏɴs!</b>"
+                afterDelCap = f"<b>ʏᴏᴜʀ ғɪʟᴇ ɪs ᴅᴇʟᴇᴛᴇᴅ ᴀғᴛᴇʀ {time_text} ᴛᴏ ᴀᴠᴏɪᴅ ᴄᴏᴘʏʀɪɢʜᴛ ᴠɪᴏʟᴀᴛɪᴏɴs!</b>"
+
+                replyed = await message.reply(delCap, reply_to_message_id=toDel.id)
+                await asyncio.sleep(FILE_AUTO_DEL_TIMER)
+                await toDel.delete()
+                return await replyed.edit(afterDelCap)
+
         if settings.get("is_verify", IS_VERIFY) and (not user_verified or is_second_shortener or is_third_shortener):
             verify_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=7))
             await db.create_verify_id(user_id, verify_id)
@@ -228,14 +281,14 @@ async def start(client: Client, message):
                 silicon = settings.get('tutorial_three', TUTORIAL3)
             else:
                 silicon = settings.get('tutorial_two', TUTORIAL2) if is_second_shortener else settings.get('tutorial', TUTORIAL)
-            
+
             buttons = [
                 [InlineKeyboardButton(text="♻️ ᴠᴇʀɪғʏ ♻️", url=verify)],
                 [InlineKeyboardButton(text="❗️ ʜᴏᴡ ᴛᴏ ᴠᴇʀɪғʏ ❓", url=silicon)]
             ]
-            
+
             msg = script.THIRDT_VERIFICATION_TEXT if await db.user_verified(user_id) else (script.SECOND_VERIFICATION_TEXT if is_second_shortener else script.VERIFICATION_TEXT)
-            
+
             d = await m.reply_text(
                 text=msg.format(message.from_user.mention, get_status()),
                 protect_content=False,
@@ -253,16 +306,18 @@ async def start(client: Client, message):
         if not files:
             await message.reply_text("<b>⚠️ ᴀʟʟ ꜰɪʟᴇs ɴᴏᴛ ꜰᴏᴜɴᴅ ⚠️</b>")
             return
-            
+
         files_to_delete = []
         for file in files:
             grp_id = temp.CHAT.get(user_id)
             settings = await get_settings(grp_id)
+            
             f_caption = settings['caption'].format(
                 file_name=formate_file_name(file['file_name']),
                 file_size=get_size(file['file_size']),
                 file_caption=file.get('caption', '')
             )
+            
             btn = [[InlineKeyboardButton("✛ ᴡᴀᴛᴄʜ & ᴅᴏᴡɴʟᴏᴀᴅ ✛", callback_data=f'stream#{file["_id"]}')]]
             toDel = await client.send_cached_media(
                 chat_id=message.from_user.id,
@@ -275,10 +330,10 @@ async def start(client: Client, message):
         time_text = f'{FILE_AUTO_DEL_TIMER / 60} ᴍɪɴᴜᴛᴇs' if FILE_AUTO_DEL_TIMER >= 60 else f'{FILE_AUTO_DEL_TIMER} sᴇᴄᴏɴᴅs'
         delCap = f"<b>ᴀʟʟ {len(files_to_delete)} ғɪʟᴇs ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ ᴀғᴛᴇʀ {time_text} ᴛᴏ ᴀᴠᴏɪᴅ ᴄᴏᴘʏʀɪɢʜᴛ ᴠɪᴏʟᴀᴛɪᴏɴs!</b>"
         afterDelCap = f"<b>ᴀʟʟ {len(files_to_delete)} ғɪʟᴇs ᴀʀᴇ ᴅᴇʟᴇᴛᴇᴅ ᴀғᴛᴇʀ {time_text} ᴛᴏ ᴀᴠᴏɪᴅ ᴄᴏᴘʏʀɪɢʜᴛ ᴠɪᴏʟᴀᴛɪᴏɴs!</b>"
-        
+
         replyed = await message.reply(delCap)
         await asyncio.sleep(FILE_AUTO_DEL_TIMER)
-        
+
         for file in files_to_delete:
             try:
                 await file.delete()
@@ -298,7 +353,6 @@ async def start(client: Client, message):
             pass
         return await message.reply('<b>⚠️ ᴀʟʟ ꜰɪʟᴇs ɴᴏᴛ ꜰᴏᴜɴᴅ ⚠️</b>')
 
-    # Safe handling of files_ type and content
     if isinstance(files_, list) and len(files_) > 0:
         files = files_[0]
     elif isinstance(files_, dict):
@@ -329,6 +383,7 @@ async def start(client: Client, message):
     await asyncio.sleep(FILE_AUTO_DEL_TIMER)
     await toDel.delete()
     return await replyed.edit(afterDelCap)
+
 
 @Client.on_message(filters.command("invite") & filters.private & filters.user(ADMINS))
 async def invite(client, message):
@@ -461,6 +516,81 @@ async def save_template(client, message):
         return await message.reply_text("Command Incomplete!")    
     await save_group_settings(grp_id, 'template', template)
     await message.reply_text(f"Successfully changed template for {title} to\n\n{template}", disable_web_page_preview=True)
+
+@Client.on_message(filters.command("resetlimit") & filters.user(ADMINS))
+async def reset_all_limits(client, message):
+    try:
+        silicondb.reset_all_file_limits()
+        await message.reply_text(
+            "<b>✅ sᴜᴄᴄᴇssꜰᴜʟʟʏ ʀᴇsᴇᴛ ꜰɪʟᴇ ʟɪᴍɪᴛs ꜰᴏʀ ᴀʟʟ ᴜsᴇʀs!</b>", 
+            parse_mode=enums.ParseMode.HTML
+        )
+    except Exception as e:
+        await message.reply_text(
+            f"<b>❌ Error resetting limits: {str(e)}</b>", 
+            parse_mode=enums.ParseMode.HTML
+        )
+
+@Client.on_message(filters.command("resetuser") & filters.user(ADMINS))
+async def reset_user_limit(client, message):
+    try:
+        if len(message.command) < 2:
+            return await message.reply_text(
+                "<b>❌ ᴜsᴀɢᴇ: /resetuser ᴜsᴇʀ_ɪᴅ</b>", 
+                parse_mode=enums.ParseMode.HTML
+            )
+        
+        user_id = int(message.command[1])
+        old_limit = silicondb.silicon_file_limit(user_id)
+        silicondb.reset_file_limit(user_id)
+        
+        await message.reply_text(
+            f"<b>✅ sᴜᴄᴄᴇssꜰᴜʟʟʏ ʀᴇsᴇᴛ ꜰɪʟᴇ ʟɪᴍɪᴛ ꜰᴏʀ ᴜsᴇʀ {user_id}!\n\n"
+            f"ᴘʀᴇᴠɪᴏᴜs ʟɪᴍɪᴛ: {old_limit}\n"
+            f"ᴄᴜʀʀᴇɴᴛ ʟɪᴍɪᴛ: 0</b>", 
+            parse_mode=enums.ParseMode.HTML
+        )
+        
+    except ValueError:
+        await message.reply_text(
+            "<b>❌ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴠᴀʟɪᴅ ᴜsᴇʀ ɪᴅ!</b>", 
+            parse_mode=enums.ParseMode.HTML
+        )
+    except Exception as e:
+        await message.reply_text(
+            f"<b>❌ ᴇʀʀᴏʀ ʀᴇsᴇᴛᴛɪɴɢ ᴜsᴇʀ ʟɪᴍɪᴛ: {str(e)}</b>", 
+            parse_mode=enums.ParseMode.HTML
+        )
+
+@Client.on_message(filters.command("checklimit") & filters.user(ADMINS))
+async def check_user_limit(client, message):
+    try:
+        if len(message.command) < 2:
+            return await message.reply_text(
+                "<b>❌ ᴜsᴀɢᴇ: /checklimit ᴜsᴇʀ_ɪᴅ</b>", 
+                parse_mode=enums.ParseMode.HTML
+            )
+        
+        user_id = int(message.command[1])
+        current_limit = silicondb.silicon_file_limit(user_id)
+        
+        await message.reply_text(
+            f"<b>📊 ꜰɪʟᴇ ʟɪᴍɪᴛ sᴛᴀᴛᴜs ꜰᴏʀ ᴜsᴇʀ {user_id}:\n\n"
+            f"ᴄᴜʀʀᴇɴᴛ ᴅᴏᴡɴʟᴏᴀᴅs: {current_limit}/{FILE_LIMIT}\n"
+            f"ʀᴇᴍᴀɪɴɪɴɢ: {max(0, FILE_LIMIT - current_limit)}</b>", 
+            parse_mode=enums.ParseMode.HTML
+        )
+        
+    except ValueError:
+        await message.reply_text(
+            "<b>❌ ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ᴠᴀʟɪᴅ ᴜsᴇʀ ɪᴅ!</b>", 
+            parse_mode=enums.ParseMode.HTML
+        )
+    except Exception as e:
+        await message.reply_text(
+            f"<b>❌ ᴇʀʀᴏʀ ᴄʜᴇᴄᴋɪɴɢ ᴜsᴇʀ ʟɪᴍɪᴛ: {str(e)}</b>", 
+            parse_mode=enums.ParseMode.HTML
+        )
     
 @Client.on_message(filters.command("send"))
 async def send_msg(bot, message):
