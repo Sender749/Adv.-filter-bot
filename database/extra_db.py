@@ -9,6 +9,7 @@ class SiliconDatabase:
         self.user_collection = mydb["referusers"]
         self.refer_collection = mydb["refers"]
         self.stg = mydb["bot_settings"]
+        self.file_limit_collection = mydb["file_limits"]  
 
     def update_bot_sttgs(self, var, val):
         if not self.stg.find_one({}):
@@ -17,7 +18,6 @@ class SiliconDatabase:
 
     def get_bot_sttgs(self):
         return self.stg.find_one({})
-
 
     def add_user(self, user_id):
         if not self.is_silicon_user_in_list(user_id):
@@ -64,5 +64,33 @@ class SiliconDatabase:
 
     def delete_all_silicon_messages(self):
         self.silicon_col.delete_many({})
+
+
+    def increment_silicon_limit(self, user_id: int):
+        self.file_limit_collection.update_one(
+            {'user_id': user_id},
+            {'$inc': {'file_count': 1}},
+            upsert=True
+        )
+
+    def silicon_file_limit(self, user_id: int) -> int:
+        user = self.file_limit_collection.find_one({'user_id': user_id})
+        return user.get('file_count', 0) if user else 0
+
+    def reset_file_limit(self, user_id: int):
+        self.file_limit_collection.update_one(
+            {'user_id': user_id},
+            {'$set': {'file_count': 0}},
+            upsert=True
+        )
+
+    def reset_all_file_limits(self):
+        self.file_limit_collection.update_many(
+            {},
+            {'$set': {'file_count': 0}}
+        )
+
+    def get_all_file_limits(self) -> list:
+        return list(self.file_limit_collection.find({}))
 
 silicondb = SiliconDatabase(DATABASE_URI, "SiliconBotz")

@@ -1,9 +1,11 @@
 import aiohttp
+from database.extra_db import silicondb
 from asyncio import sleep 
-from datetime import datetime
+from datetime import datetime, timedelta
 from database.users_chats_db import db
 from info import LOG_CHANNEL, URL
 from pyrogram.types import BotCommand
+import pytz
 
 COMMANDS = {
     "start": "ꜱᴛᴀʀᴛ ᴛʜᴇ ʙᴏᴛ.",
@@ -42,7 +44,10 @@ COMMANDS = {
     "del_msg": "ᴅᴇʟᴇᴛᴇ ᴀʟʟ ᴜᴘᴅᴀᴛᴇ ᴍᴇssᴀɢᴇ ꜰʀᴏᴍ ᴅʙ.",
     "movie_update": "ᴍᴏᴠɪᴇ ᴜᴘᴅᴀᴛᴇ ᴏɴ/ᴏꜰꜰ ᴀᴄᴄᴏʀᴅɪɴɢ ʏᴏᴜʀ ɴᴇᴇᴅᴇᴅ...",
     "pm_search": "ᴘᴍ sᴇᴀʀᴄʜ ᴏɴ/ᴏꜰꜰ ᴀᴄᴄᴏʀᴅɪɴɢ ʏᴏᴜʀ ɴᴇᴇᴅᴇᴅ...",
-    "auto_filter": "ᴀᴜᴛᴏ ғɪʟᴛᴇʀ ᴏɴ/ᴏꜰꜰ ᴀᴄᴄᴏʀᴅɪɴɢ ʏᴏᴜʀ ɴᴇᴇᴅᴇᴅ..."
+    "auto_filter": "ᴀᴜᴛᴏ ғɪʟᴛᴇʀ ᴏɴ/ᴏꜰꜰ ᴀᴄᴄᴏʀᴅɪɴɢ ʏᴏᴜʀ ɴᴇᴇᴅᴇᴅ...",
+    "resetlimit": "ʀᴇsᴇᴛ ᴀʟʟ ᴜsᴇʀs ꜰɪʟᴇ ʟɪᴍɪᴛ ᴛᴏ 0.",
+    "resetuser": "ʀᴇsᴇᴛ sᴘᴇᴄɪꜰɪᴄ ᴜsᴇʀ ꜰɪʟᴇ ʟɪᴍɪᴛ.",
+    "checklimit": "ᴄʜᴇᴄᴋ ᴜsᴇʀ ᴄᴜʀʀᴇɴᴛ ꜰɪʟᴇ ʟɪᴍɪᴛ."
 }
 
 async def check_expired_premium(client):
@@ -70,6 +75,19 @@ async def set_silicon_commands(client):
         print("✅ Bot commands updated successfully!")
     except Exception as e:
         print(f"❌ Error setting bot commands: {e}")
+            
+async def reset_file_limits_daily():
+    tz = pytz.timezone('Asia/Kolkata')
+    while True:
+        now = datetime.now(tz)
+        target_time = time(23, 59)
+        target_datetime = tz.localize(datetime.combine(now.date(), target_time))
+        if now > target_datetime:
+            target_datetime += timedelta(days=1)
+        time_diff = (target_datetime - now).total_seconds()
+        await asyncio.sleep(time_diff)
+        silicondb.reset_all_file_limits()
+        logging.info("Files count reset successfully")
 
 async def keep_alive():
     async with aiohttp.ClientSession() as session:
