@@ -10,7 +10,7 @@ from datetime import date, datetime
 import datetime
 import pytz
 from aiohttp import web
-from plugins import check_expired_premium, set_silicon_commands, keep_alive
+from plugins import check_expired_premium, set_silicon_commands, keep_alive, reset_file_limits_daily 
 from web import web_app
 import time
 
@@ -42,6 +42,7 @@ class Bot(Client):
         await set_silicon_commands(self)
         self.loop.create_task(check_expired_premium(self))
         self.loop.create_task(keep_alive())
+        self.loop.create_task(reset_file_limits_daily()) 
         print(f"{me.first_name} is started now ❤️")
         tz = pytz.timezone('Asia/Kolkata')
         today = date.today()
