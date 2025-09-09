@@ -1,6 +1,7 @@
-from pyrogram import Client, filters
+from pyrogram import Client, filters, enums
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.errors.exceptions.bad_request_400 import MessageTooLong
+from pyrogram.errors import ChatAdminRequired, ChatWriteForbidden
 from info import ADMINS, LOG_CHANNEL, USERNAME
 from database.users_chats_db import db
 from database.ia_filterdb import get_secondary_db_storage, get_primary_db_storage, is_second_db_configured, db_count_documents, second_db_count_documents
@@ -21,7 +22,14 @@ async def save_group(bot, message):
         if (str(message.chat.id)).startswith("-100") and not await db.get_chat(message.chat.id):
             total=await bot.get_chat_members_count(message.chat.id)
             user = message.from_user.mention if message.from_user else "Dear" 
-            group_link = await message.chat.export_invite_link()
+            try:
+                group_link = await message.chat.export_invite_link()
+            except ChatAdminRequired:
+                group_link = None
+                print(f"Bot is not admin in {message.chat.title} ({message.chat.id})")
+            except Exception as e:
+                group_link = None
+                print(f"Error exporting link: {e}")
             await bot.send_message(LOG_CHANNEL, script.NEW_GROUP_TXT.format(temp.B_LINK, message.chat.title, message.chat.id, message.chat.username, group_link, total, user), disable_web_page_preview=True)  
             await db.add_chat(message.chat.id, message.chat.title)
             btn = [[
@@ -33,6 +41,10 @@ async def save_group(bot, message):
                 text=f"<b>☤ ᴛʜᴀɴᴋ ʏᴏᴜ ꜰᴏʀ ᴀᴅᴅɪɴɢ ᴍᴇ ɪɴ {message.chat.title}\n\n🤖 ᴅᴏɴ’ᴛ ꜰᴏʀɢᴇᴛ ᴛᴏ ᴍᴀᴋᴇ ᴍᴇ ᴀᴅᴍɪɴ 🤖\n\n㊝ ɪꜰ ʏᴏᴜ ʜᴀᴠᴇ ᴀɴʏ ᴅᴏᴜʙᴛ ʏᴏᴜ ᴄʟᴇᴀʀ ɪᴛ ᴜsɪɴɢ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴs ㊜</b>",
                 reply_markup=reply_markup
             )
+            try:
+                await db.connect_group(message.chat.id, message.from_user.id)
+            except Exception as e:
+                print(f"connecting group error: {e}")
 
 @Client.on_message(filters.command('leave') & filters.user(ADMINS))
 async def leave_a_chat(bot, message):
@@ -50,18 +62,40 @@ async def leave_a_chat(bot, message):
     except:
         chat = chat
     try:
-        btn = [[
-            InlineKeyboardButton('⚡️ ᴏᴡɴᴇʀ ⚡️', url=USERNAME)
-        ]]
-        reply_markup=InlineKeyboardMarkup(btn)
-        await bot.send_message(
-            chat_id=chat,
-            text=f'😞 ʜᴇʟʟᴏ ᴅᴇᴀʀ,\nᴍʏ ᴏᴡɴᴇʀ ʜᴀꜱ ᴛᴏʟᴅ ᴍᴇ ᴛᴏ ʟᴇᴀᴠᴇ ꜰʀᴏᴍ ɢʀᴏᴜᴘ ꜱᴏ ɪ ɢᴏ 😔\n\n🚫 ʀᴇᴀꜱᴏɴ ɪꜱ - <code>{reason}</code>\n\nɪꜰ ʏᴏᴜ ɴᴇᴇᴅ ᴛᴏ ᴀᴅᴅ ᴍᴇ ᴀɢᴀɪɴ ᴛʜᴇɴ ᴄᴏɴᴛᴀᴄᴛ ᴍʏ ᴏᴡɴᴇʀ 👇',
-            reply_markup=reply_markup,
-        )
-        await bot.leave_chat(chat)
+        admins = []
+        async for member in bot.get_chat_members(chat, filter=enums.ChatMembersFilter.ADMINISTRATORS):
+            admins.append(member)
+        admin_ids = [admin.user.id for admin in admins]
+        btn = [[InlineKeyboardButton('⚡️ ᴏᴡɴᴇʀ ⚡️', url=USERNAME)]]
+        reply_markup = InlineKeyboardMarkup(btn)
+        try:
+            await bot.send_message(
+                chat_id=chat,
+                text=(
+                    f'😞 ʜᴇʟʟᴏ ᴅᴇᴀʀ,\n'
+                    f'ᴍʏ ᴏᴡɴᴇʀ ʜᴀꜱ ᴛᴏʟᴅ ᴍᴇ ᴛᴏ ʟᴇᴀᴠᴇ ꜰʀᴏᴍ ɢʀᴏᴜᴘ ꜱᴏ ɪ ɢᴏ 😔\n\n'
+                    f'🚫 ʀᴇᴀꜱᴏɴ ɪꜱ - <code>{reason}</code>\n\n'
+                    f'ɪꜰ ʏᴏᴜ ɴᴇᴇᴅ ᴛᴏ ᴀᴅᴅ ᴍᴇ ᴀɢᴀɪɴ ᴛʜᴇɴ ᴄᴏɴᴛᴀᴄᴛ ᴍʏ ᴏᴡɴᴇʀ 👇'
+                ),
+                reply_markup=reply_markup,
+            )
+        except ChatWriteForbidden:
+            print(f"⚠️ Cannot send message to {chat} — bot might not have permission.")
+        try:
+            await bot.leave_chat(chat)
+        except Exception as e:
+            print(f"⚠️ Could not leave chat {chat}: {e}")
         await db.delete_chat(chat)
-        await message.reply(f"<b>ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ʟᴇꜰᴛ ꜰʀᴏᴍ ɢʀᴏᴜᴘ - `{chat}`</b>")
+        for admin_id in admin_ids:
+            try:
+                await db.disconnect_group(chat, admin_id)
+            except Exception as e:
+                print(f"⚠️ error disconnecting group {chat} for user {admin_id}: {e}")
+                continue
+        await message.reply(
+            f"<b>ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ʟᴇꜰᴛ ꜰʀᴏᴍ ɢʀᴏᴜᴘ - `{chat}`</b>\n\n"
+            f"👑 ɢʀᴏᴜᴘ ᴀᴅᴍɪɴꜱ: <code>{admin_ids}</code>"
+        )
     except Exception as e:
         await message.reply(f'<b>🚫 ᴇʀʀᴏʀ - `{e}`</b>')
 

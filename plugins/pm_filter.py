@@ -8,7 +8,7 @@ from info import *
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto, ChatPermissions, ReplyKeyboardMarkup
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid, ChatAdminRequired
-from utils import temp, get_settings, is_check_admin, get_status, get_hash, get_size, save_group_settings, is_subscribed, is_req_subscribed, get_poster, get_status, get_readable_time , imdb , formate_file_name, process_trending_data, create_keyboard_layout, log_error, extract_limit_from_command, generate_trend_list
+from utils import temp, get_settings, is_check_admin, get_status, get_size, save_group_settings, is_subscribed, is_req_subscribed, get_poster, get_status, get_readable_time , imdb , formate_file_name, process_trending_data, create_keyboard_layout, log_error, group_setting_buttons
 from database.users_chats_db import db
 from database.extra_db import silicondb
 from database.ia_filterdb import collection, is_second_db_configured, second_collection, get_search_results, delete_files
@@ -890,6 +890,20 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await d.delete()
         else:
             await query.message.edit_text("<b>ꜱᴏᴍᴇᴛʜɪɴɢ ᴡᴇɴᴛ ᴡʀᴏɴɢ</b>")
+
+    elif query.data.startswith("group_pm"):
+        _, grp_id = query.data.split("#")
+        user_id = query.from_user.id if query.from_user else None
+        btn = await group_setting_buttons(int(grp_id)) 
+        gt = await client.get_chat(int(grp_id))
+        await query.message.edit(
+            text=(
+                f"ᴄʜᴀɴɢᴇ ʏᴏᴜʀ ɢʀᴏᴜᴘ ꜱᴇᴛᴛɪɴɢꜱ ✅\n\n"
+                f"ɢʀᴏᴜᴘ ɴᴀᴍᴇ - {gt.title} ⚙ \n"
+                f"ɢʀᴏᴜᴘ ɪᴅ - <code>{gt.id}</code> "
+            ),
+            reply_markup=InlineKeyboardMarkup(btn)
+        )
 
     elif query.data.startswith("batchfiles"):
         ident, group_id, message_id, user = query.data.split("#")

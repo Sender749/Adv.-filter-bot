@@ -20,6 +20,8 @@ class Database:
         self.movies_update_channel = mydb.movies_update_channel
         self.botcol = mydb.bot_settings
         self.movie_updates = mydb.movie_updates
+        self.connection = mydb.connections
+
         self.default = {
             'spell_check': SPELL_CHECK,
             'auto_filter': AUTO_FILTER,
@@ -386,6 +388,29 @@ class Database:
         except Exception as e:
             print(f"Got err in db set : {e}")
             return False
+    
+    #group connection 
+    async def connect_group(self, group_id: int, user_id: int):
+        user = await self.connection.find_one({'_id': user_id})
+        if user:
+            await self.connection.update_one(
+                {'_id': user_id},
+                {"$addToSet": {"group_ids": group_id}}
+            )
+        else:
+            await self.connection.insert_one(
+                {'_id': user_id, 'group_ids': [group_id]}
+            )
+    async def get_connected_grps(self, user_id: int) -> list:
+        user = await self.connection.find_one({'_id': user_id})
+        return user.get("group_ids", []) if user else []
 
+    async def disconnect_group(self, group_id: int, user_id: int):
+        user = await self.connection.find_one({'_id': user_id})
+        if user:
+            await self.connection.update_one(
+                {'_id': user_id},
+                {"$pull": {"group_ids": group_id}}
+            )
 
 db = Database()
