@@ -84,13 +84,14 @@ class Database:
                 'ban_reason': ""
             }
         }
-
     async def get_settings(self, id: int) -> dict:
         chat = await self.grp.find_one({'id': id})
         if not chat:
+            if id < 0:
+                await self.grp.insert_one({'id': id, 'settings': self.default})
             return self.default
         return chat.get('settings', self.default)
-
+    
     async def update_settings(self, id: int, settings: dict):
         await self.grp.update_one(
             {'id': id}, 
