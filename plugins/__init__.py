@@ -86,7 +86,7 @@ async def reset_file_limits_daily():
         time_diff = (target_datetime - now).total_seconds()
         await asyncio.sleep(time_diff)
         silicondb.reset_all_file_limits()
-        logging.info("Files count reset successfully")
+        print("Files count reset successfully")
 
 async def keep_alive():
     async with aiohttp.ClientSession() as session:
