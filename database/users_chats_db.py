@@ -85,6 +85,7 @@ class Database:
             }
         }
     async def get_settings(self, id: int) -> dict:
+        id = int(id) 
         chat = await self.grp.find_one({'id': id})
         if not chat:
             if id < 0:
