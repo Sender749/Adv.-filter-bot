@@ -1,8 +1,7 @@
 import asyncio
 from pyrogram import Client, filters, enums
-from pyrogram.errors import FloodWait
-from pyrogram.errors.exceptions.bad_request_400 import ChannelInvalid, ChatAdminRequired, UsernameInvalid, UsernameNotModified
-from info import ADMINS, LOG_CHANNEL, CHANNELS
+from pyrogram.errors import FloodWait, MessageNotModified
+from info import ADMINS, CHANNELS
 from database.ia_filterdb import save_file
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from utils import temp, get_readable_time
@@ -100,14 +99,20 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot, skip):
                 time_taken = get_readable_time(time.time()-start_time)
                 if temp.CANCEL:
                     temp.CANCEL = False
-                    await msg.edit(f"sᴜᴄᴄᴇssꜰᴜʟʟʏ ᴄᴀɴᴄᴇʟʟᴇᴅ!\nᴄᴏᴍᴘʟᴇᴛᴇᴅ ɪɴ {time_taken}\n\nsᴀᴠᴇᴅ <code>{total_files}</code> ꜰɪʟᴇs ᴛᴏ ᴅᴀᴛᴀʙᴀsᴇ!\nᴅᴜᴘʟɪᴄᴀᴛᴇ ꜰɪʟᴇs sᴋɪᴘᴘᴇᴅ: <code>{duplicate}</code>\nᴅᴇʟᴇᴛᴇᴅ ᴍᴇssᴀɢᴇs sᴋɪᴘᴘᴇᴅ: <code>{deleted}</code>\nɴᴏɴ-ᴍᴇᴅɪᴀ ᴍᴇssᴀɢᴇs sᴋɪᴘᴘᴇᴅ: <code>{no_media + unsupported}</code>\nᴜɴsᴜᴘᴘᴏʀᴛᴇᴅ ᴍᴇᴅɪᴀ: <code>{unsupported}</code>\nᴇʀʀᴏʀs ᴏᴄᴄᴜʀʀᴇᴅ: <code>{errors}</code>")
+                    try:
+                        await msg.edit(f"sᴜᴄᴄᴇssꜰᴜʟʟʏ ᴄᴀɴᴄᴇʟʟᴇᴅ!\nᴄᴏᴍᴘʟᴇᴛᴇᴅ ɪɴ {time_taken}\n\nsᴀᴠᴇᴅ <code>{total_files}</code> ꜰɪʟᴇs ᴛᴏ ᴅᴀᴛᴀʙᴀsᴇ!\nᴅᴜᴘʟɪᴄᴀᴛᴇ ꜰɪʟᴇs sᴋɪᴘᴘᴇᴅ: <code>{duplicate}</code>\nᴅᴇʟᴇᴛᴇᴅ ᴍᴇssᴀɢᴇs sᴋɪᴘᴘᴇᴅ: <code>{deleted}</code>\nɴᴏɴ-ᴍᴇᴅɪᴀ ᴍᴇssᴀɢᴇs sᴋɪᴘᴘᴇᴅ: <code>{no_media + unsupported}</code>\nᴜɴsᴜᴘᴘᴏʀᴛᴇᴅ ᴍᴇᴅɪᴀ: <code>{unsupported}</code>\nᴇʀʀᴏʀs ᴏᴄᴄᴜʀʀᴇᴅ: <code>{errors}</code>")
+                    except MessageNotModified:
+                        pass
                     return
                 current += 1
                 if current % 100 == 0:
                     btn = [[
                         InlineKeyboardButton('CANCEL', callback_data=f'index#cancel#{chat}#{lst_msg_id}#{skip}')
                     ]]
-                    await msg.edit_text(text=f"ᴛᴏᴛᴀʟ ᴍᴇssᴀɢᴇs ʀᴇᴄᴇɪᴠᴇᴅ: <code>{current}</code>\nᴛᴏᴛᴀʟ ᴍᴇssᴀɢᴇs sᴀᴠᴇᴅ: <code>{total_files}</code>\nᴅᴜᴘʟɪᴄᴀᴛᴇ ꜰɪʟᴇs sᴋɪᴘᴘᴇᴅ: <code>{duplicate}</code>\nᴅᴇʟᴇᴛᴇᴅ ᴍᴇssᴀɢᴇs sᴋɪᴘᴘᴇᴅ: <code>{deleted}</code>\nɴᴏɴ-ᴍᴇᴅɪᴀ ᴍᴇssᴀɢᴇs sᴋɪᴘᴘᴇᴅ: <code>{no_media + unsupported}</code>\nᴜɴsᴜᴘᴘᴏʀᴛᴇᴅ ᴍᴇᴅɪᴀ: <code>{unsupported}</code>\nᴇʀʀᴏʀs ᴏᴄᴄᴜʀʀᴇᴅ: <code>{errors}</code>", reply_markup=InlineKeyboardMarkup(btn))
+                    try:
+                        await msg.edit_text(text=f"ᴛᴏᴛᴀʟ ᴍᴇssᴀɢᴇs ʀᴇᴄᴇɪᴠᴇᴅ: <code>{current}</code>\nᴛᴏᴛᴀʟ ᴍᴇssᴀɢᴇs sᴀᴠᴇᴅ: <code>{total_files}</code>\nᴅᴜᴘʟɪᴄᴀᴛᴇ ꜰɪʟᴇs sᴋɪᴘᴘᴇᴅ: <code>{duplicate}</code>\nᴅᴇʟᴇᴛᴇᴅ ᴍᴇssᴀɢᴇs sᴋɪᴘᴘᴇᴅ: <code>{deleted}</code>\nɴᴏɴ-ᴍᴇᴅɪᴀ ᴍᴇssᴀɢᴇs sᴋɪᴘᴘᴇᴅ: <code>{no_media + unsupported}</code>\nᴜɴsᴜᴘᴘᴏʀᴛᴇᴅ ᴍᴇᴅɪᴀ: <code>{unsupported}</code>\nᴇʀʀᴏʀs ᴏᴄᴄᴜʀʀᴇᴅ: <code>{errors}</code>", reply_markup=InlineKeyboardMarkup(btn))
+                    except MessageNotModified:
+                        pass
                     await asyncio.sleep(2)
                 if message.empty:
                     deleted += 1
@@ -139,4 +144,7 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot, skip):
             await msg.reply(f'ɪɴᴅᴇx ᴄᴀɴᴄᴇʟᴇᴅ ᴅᴜᴇ ᴛᴏ ᴇʀʀᴏʀ - {e}')
         else:
             time_taken = get_readable_time(time.time()-start_time)
-            await msg.edit(f'sᴜᴄᴄᴇsꜰᴜʟʟʏ sᴀᴠᴇᴅ <code>{total_files}</code> ᴛᴏ ᴅᴀᴛᴀʙᴀsᴇ!\nᴄᴏᴍᴘʟᴇᴛᴇᴅ ɪɴ {time_taken}\n\nᴅᴜᴘʟɪᴄᴀᴛᴇ ꜰɪʟᴇs sᴋɪᴘᴘᴇᴅ: <code>{duplicate}</code>\nᴅᴇʟᴇᴛᴇᴅ ᴍᴇssᴀɢᴇs sᴋɪᴘᴘᴇᴅ: <code>{deleted}</code>\nɴᴏɴ-ᴍᴇᴅɪᴀ ᴍᴇssᴀɢᴇs sᴋɪᴘᴘᴇᴅ: <code>{no_media + unsupported}</code>\nᴜɴsᴜᴘᴘᴏʀᴛᴇᴅ ᴍᴇᴅɪᴀ: <code>{unsupported}</code>\nᴇʀʀᴏʀs ᴏᴄᴄᴜʀʀᴇᴅ: <code>{errors}</code>')
+            try:
+                await msg.edit(f'sᴜᴄᴄᴇsꜰᴜʟʟʏ sᴀᴠᴇᴅ <code>{total_files}</code> ᴛᴏ ᴅᴀᴛᴀʙᴀsᴇ!\nᴄᴏᴍᴘʟᴇᴛᴇᴅ ɪɴ {time_taken}\n\nᴅᴜᴘʟɪᴄᴀᴛᴇ ꜰɪʟᴇs sᴋɪᴘᴘᴇᴅ: <code>{duplicate}</code>\nᴅᴇʟᴇᴛᴇᴅ ᴍᴇssᴀɢᴇs sᴋɪᴘᴘᴇᴅ: <code>{deleted}</code>\nɴᴏɴ-ᴍᴇᴅɪᴀ ᴍᴇssᴀɢᴇs sᴋɪᴘᴘᴇᴅ: <code>{no_media + unsupported}</code>\nᴜɴsᴜᴘᴘᴏʀᴛᴇᴅ ᴍᴇᴅɪᴀ: <code>{unsupported}</code>\nᴇʀʀᴏʀs ᴏᴄᴄᴜʀʀᴇᴅ: <code>{errors}</code>')
+            except MessageNotModified:
+                pass
