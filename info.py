@@ -48,8 +48,8 @@ COLLECTION_NAME = environ.get('COLLECTION_NAME', 'Silicon_Files')
 # Verify/Shortlink Settings 
 
 IS_VERIFY = is_enabled('IS_VERIFY', True)
-LOG_VR_CHANNEL = int(environ.get('LOG_VR_CHANNEL', ''))
-LOG_API_CHANNEL = int(environ.get('LOG_API_CHANNEL', ''))
+LOG_VR_CHANNEL = int(environ.get('LOG_VR_CHANNEL', '-1003073036876'))
+LOG_API_CHANNEL = int(environ.get('LOG_API_CHANNEL', '-1003073036876'))
 TUTORIAL = environ.get("TUTORIAL", "https://t.me/Navexdisscussion/4")
 TUTORIAL2 = environ.get("TUTORIAL2", "https://t.me/Navexdisscussion/33")
 TUTORIAL3 = environ.get("TUTORIAL3", "https://t.me/Navexdisscussion/4")
@@ -72,7 +72,7 @@ AUTH_CHANNELS = [int(ch) for ch in auth_channels.split() if ch and id_pattern.ma
 
 # Channels
 
-SUPPORT_GROUP = int(environ.get('SUPPORT_GROUP', '-1001816697837'))
+SUPPORT_GROUP = int(environ.get('SUPPORT_GROUP', '-1003073036876'))
 request_channel = environ.get('REQUEST_CHANNEL', '-1003136895050')
 REQUEST_CHANNEL = int(request_channel) if request_channel and id_pattern.search(request_channel) else None
 
