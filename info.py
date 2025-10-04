@@ -18,9 +18,9 @@ def is_valid_ip(ip):
 
 # Main Variables 
 
-API_ID = int(environ.get('API_ID', 'Navex'))
-API_HASH = environ.get('API_HASH', '25208597')
-BOT_TOKEN = environ.get('BOT_TOKEN', 'e99c3c5693d6d23a143b6ce760b7a6de')
+API_ID = int(environ.get('API_ID', '25208597'))
+API_HASH = environ.get('API_HASH', 'e99c3c5693d6d23a143b6ce760b7a6de')
+BOT_TOKEN = environ.get('BOT_TOKEN', '')
 ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '6541030917').split()]
 USERNAME = environ.get('USERNAME', "https://telegram.me/Silicon_Official")
 LOG_CHANNEL = int(environ.get('LOG_CHANNEL', '-1003137381162'))
