@@ -496,10 +496,13 @@ async def spoll_checker(bot, query):
         ], [
             InlineKeyboardButton("🚫 ᴄʟᴏsᴇ 🚫", callback_data="close_data")
         ]]
-        k = await query.message.edit(script.NO_RESULT_TXT)
+        await query.message.edit(
+            script.NO_RESULT_TXT,
+            reply_markup=InlineKeyboardMarkup(buttons)
+        )
         await asyncio.sleep(60)
         try:
-            await query.message.reply_to_message.delete()
+            await query.message.delete()
         except:
             pass
 
