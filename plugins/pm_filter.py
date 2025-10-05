@@ -160,7 +160,7 @@ async def next_page(bot, query):
             links = ""
             btn = [[
                 InlineKeyboardButton(
-                    f"📁 {get_size(f['file_size'])}≽ {formate_file_name(f['file_name'])}",
+                    f"📁 {get_size(f['file_size'])}≽ {f.get('caption', formate_file_name(f['file_name']))}",
                     url=f"https://telegram.dog/{temp.U_NAME}?start=file_{query.message.chat.id}_{f['_id']}"
                 )
             ] for f in files]
@@ -1322,7 +1322,6 @@ async def auto_filter(client, msg, spoll=False):
             await asyncio.sleep(DELETE_TIME)
             try:
                 await response_msg.delete()
-                await message.delete()
             except:
                 pass
 
