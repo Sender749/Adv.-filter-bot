@@ -491,9 +491,13 @@ async def spoll_checker(bot, query):
         k = (search, files, offset, total_results)
         await auto_filter(bot, query, k)
     else:
+        buttons = [[
+            InlineKeyboardButton("⚠️ ʀᴇᴏ̨ᴜᴇsᴛ ᴛᴏ ᴀᴅᴍɪɴ ⚠️", callback_data=f"req_admin#{search}#{query.from_user.id}")
+        ], [
+            InlineKeyboardButton("🚫 ᴄʟᴏsᴇ 🚫", callback_data="close_data")
+        ]]
         k = await query.message.edit(script.NO_RESULT_TXT)
         await asyncio.sleep(60)
-        await k.delete()
         try:
             await query.message.reply_to_message.delete()
         except:
@@ -1358,11 +1362,10 @@ async def silicon_spell_check(message):
     except:
         k = await message.reply(script.I_CUDNT.format(message.from_user.mention))
         await asyncio.sleep(60)
-        await k.delete()
-        try:
-            await message.delete()
-        except:
-            pass
+      #  try:
+      #      await message.delete()
+      #  except:
+      #      pass
         return
     if not movies:
         google = search.replace(" ", "+")
@@ -1374,10 +1377,10 @@ async def silicon_spell_check(message):
         k = await message.reply_text(text=script.I_CUDNT.format(search), reply_markup=InlineKeyboardMarkup(button))
         await asyncio.sleep(120)
         await k.delete()
-        try:
-            await message.delete()
-        except:
-            pass
+       # try:
+       #     await message.delete()
+       # except:
+       #     pass
         return
     user = message.from_user.id if message.from_user else 0
     buttons = [[
@@ -1391,7 +1394,37 @@ async def silicon_spell_check(message):
     d = await message.reply_text(text=script.CUDNT_FND.format(message.from_user.mention), reply_markup=InlineKeyboardMarkup(buttons), reply_to_message_id=message.id)
     await asyncio.sleep(120)
     await d.delete()
-    try:
-        await message.delete()
-    except:
-        pass
+    #try:
+      #  await message.delete()
+  #  except:
+     #   pass
+
+@Client.on_callback_query(filters.regex(r"^req_admin"))
+async def request_to_admin(bot, query):
+    _, search, user_id = query.data.split('#')
+    if int(user_id) != query.from_user.id:
+        return await query.answer(script.ALRT_TXT, show_alert=True)
+    
+    # Create buttons similar to /request command
+    buttons = [[
+        InlineKeyboardButton('👀 View Request', url=f"{query.message.link}")
+    ],[
+        InlineKeyboardButton('⚙ Show Options', callback_data=f'show_options#{query.from_user.id}#{query.message.id}')
+    ]]
+    
+    # Send to request channel (same as /request command)
+    sent_request = await bot.send_message(
+        REQUEST_CHANNEL,
+        script.REQUEST_TXT.format(query.from_user.mention, query.from_user.id, search),
+        reply_markup=InlineKeyboardMarkup(buttons)
+    )
+    
+    # Send confirmation to user
+    btn = [[
+        InlineKeyboardButton('✨ ᴠɪᴇᴡ ʏᴏᴜʀ ʀᴇᴏ̨ᴜᴇsᴛ ✨', url=f"{sent_request.link}")
+    ]]
+    await query.message.edit_text(
+        text="<b>✅ Your request has been sent to admin!</b>",
+        reply_markup=InlineKeyboardMarkup(btn)
+    )
+    await query.answer()
