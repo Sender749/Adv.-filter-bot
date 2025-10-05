@@ -94,13 +94,13 @@ LANDSCAPE_POSTER = bool(environ.get('LANDSCAPE_POSTER', True)) # Shows landscape
 AUTO_FILTER = is_enabled('AUTO_FILTER', True)
 FILE_AUTO_DEL_TIMER = int(environ.get('FILE_AUTO_DEL_TIMER', '600'))
 PORT = os.environ.get('PORT', '5000')
-MAX_BTN = int(environ.get('MAX_BTN', '8'))
+MAX_BTN = int(environ.get('MAX_BTN', '10'))
 AUTO_DELETE = is_enabled('AUTO_DELETE', True)
 DELETE_TIME = int(environ.get('DELETE_TIME', 300))
-IMDB = is_enabled('IMDB', True)
+IMDB = is_enabled('IMDB', False)
 FILE_CAPTION = environ.get('FILE_CAPTION', f'{script.FILE_CAPTION}')
 IMDB_TEMPLATE = environ.get('IMDB_TEMPLATE', f'{script.IMDB_TEMPLATE_TXT}')
-LONG_IMDB_DESCRIPTION = is_enabled('LONG_IMDB_DESCRIPTION', True)
+LONG_IMDB_DESCRIPTION = is_enabled('LONG_IMDB_DESCRIPTION', False)
 PROTECT_CONTENT = is_enabled('PROTECT_CONTENT', False)
 SPELL_CHECK = is_enabled('SPELL_CHECK', True)
 LINK_MODE = is_enabled('LINK_MODE', True)
@@ -114,14 +114,14 @@ SEASONS = [("sᴇᴀsᴏɴ 𝟷", "s01"), ("sᴇᴀsᴏɴ 𝟸", "s02"), ("sᴇ�
 
 # Stream Settings 
 
-IS_PREMIUM_STREAM = is_enabled('IS_PREMIUM_STREAM', False) # True To Allow Stream For Premium User Only
+IS_PREMIUM_STREAM = is_enabled('IS_PREMIUM_STREAM', True) # True To Allow Stream For Premium User Only
 BIN_CHANNEL = environ.get("BIN_CHANNEL", "-1002904285991") # Channel Where Files sent For stream
 if len(BIN_CHANNEL) == 0:
     print('Error BIN_CHANNEL is missing, exiting now')
     exit()
 else:
     BIN_CHANNEL = int(BIN_CHANNEL)
-URL = environ.get("URL", "https://efficient-greer-silicon-develr09-a7dbfae3.koyeb.app/") #App URL Where you deployed
+URL = environ.get("URL", "youthful-rivkah-naha-5200b60e.koyeb.app/") #App URL Where you deployed
 if len(URL) == 0:
     print('error URL is missing, exiting now')
     exit()
