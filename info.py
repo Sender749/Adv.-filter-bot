@@ -121,7 +121,7 @@ if len(BIN_CHANNEL) == 0:
     exit()
 else:
     BIN_CHANNEL = int(BIN_CHANNEL)
-URL = environ.get("URL", "youthful-rivkah-naha-5200b60e.koyeb.app/") #App URL Where you deployed
+URL = environ.get("URL", "https://youthful-rivkah-naha-5200b60e.koyeb.app/") #App URL Where you deployed
 if len(URL) == 0:
     print('error URL is missing, exiting now')
     exit()
