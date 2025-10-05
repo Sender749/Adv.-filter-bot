@@ -47,7 +47,7 @@ async def update_filter_words(client, message):
             return
         
         # Merge with existing set
-        existing_words = await get_filter_words()
+        existing_words = get_filter_words()
         updated_words = existing_words.union(new_words)
         set_filter_words(updated_words)
         
@@ -75,7 +75,7 @@ async def remove_filter_words(client, message):
         remove_words_raw = message.text.split(maxsplit=1)[1]
         remove_words = {w.strip().lower() for w in remove_words_raw.split(",") if w.strip()}
 
-        existing_words = await get_filter_words()
+        existing_words = get_filter_words()
         before_count = len(existing_words)
 
         updated_words = existing_words.difference(remove_words)
