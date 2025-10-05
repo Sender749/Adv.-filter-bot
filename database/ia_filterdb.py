@@ -16,10 +16,12 @@ filter_words_collection = db["filter_words"]
 second_collection = None
 
 try:
-    collection.create_index([("file_name", TEXT), ("caption", TEXT)])
+    collection.create_index([("file_name", TEXT)])
 except OperationFailure as e:
-    if "already exists" not in str(e):
-        raise e
+
+try:
+    collection.create_index([("caption", TEXT)])
+except OperationFailure as e:
 
         if not SECOND_FILES_DATABASE_URL:
             logger.error('Your FILES_DATABASE_URL is full; please add SECOND_FILES_DATABASE_URL.')
