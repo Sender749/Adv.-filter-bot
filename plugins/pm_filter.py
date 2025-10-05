@@ -683,11 +683,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ],
             [
                 InlineKeyboardButton('• ᴛᴏᴘ', callback_data='top_search'),
-                InlineKeyboardButton('• ᴀʙᴏᴜᴛ', callback_data='about')
-            ],
-            [
-                InlineKeyboardButton('• ᴇᴀʀɴ ᴍᴏɴᴇʏ ᴡɪᴛʜ ʙᴏᴛ •', callback_data='earn')]
-            ]
+                InlineKeyboardButton ('📖 ᴅᴍᴄᴀ', callback_data='dmca')
+            ]]
+          #  [
+          #      InlineKeyboardButton('• ᴇᴀʀɴ ᴍᴏɴᴇʏ ᴡɪᴛʜ ʙᴏᴛ •', callback_data='earn')]
+          #  ]
         reply_markup = InlineKeyboardMarkup(buttons)
         await query.message.edit_text(
             text=script.START_TXT.format(query.from_user.mention, get_status(), query.from_user.id),
