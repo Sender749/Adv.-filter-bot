@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 async def show_filter_words(client, message):
     """Show all currently active filter words."""
     try:
-        words = await get_filter_words()
+        words = get_filter_words()
         if not words:
             await message.reply_text("📝 No filter words set yet.\nUse `/set_filterword word1, word2` to add some.")
             return
@@ -49,7 +49,7 @@ async def update_filter_words(client, message):
         # Merge with existing set
         existing_words = await get_filter_words()
         updated_words = existing_words.union(new_words)
-        await set_filter_words(updated_words)
+        set_filter_words(updated_words)
         
         added_count = len(updated_words) - len(existing_words)
         await message.reply_text(
@@ -79,7 +79,7 @@ async def remove_filter_words(client, message):
         before_count = len(existing_words)
 
         updated_words = existing_words.difference(remove_words)
-        await set_filter_words(updated_words)
+        set_filter_words(updated_words)
         removed_count = before_count - len(updated_words)
 
         if removed_count > 0:
