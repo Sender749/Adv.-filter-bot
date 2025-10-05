@@ -515,6 +515,61 @@ async def spoll_checker(bot, query):
         except:
             pass
 
+@Client.on_callback_query(filters.regex(r"^req_admin"))
+async def request_to_admin(bot, query):
+    try:
+        _, search, user_id = query.data.split('#')
+        if int(user_id) != query.from_user.id:
+            return await query.answer(script.ALRT_TXT, show_alert=True)
+    except Exception as e:
+        print(f"Error parsing req_admin data: {e}")
+        return await query.answer("Something went wrong!", show_alert=True)
+
+    # ✅ Reuse same behavior as /req command
+    try:
+        # Prepare same buttons as /req
+        buttons = [[
+            InlineKeyboardButton('👀 ᴠɪᴇᴡ ʀᴇǫᴜᴇꜱᴛ 👀', url=f"{query.message.link}")
+        ],[
+            InlineKeyboardButton('⚙ sʜᴏᴡ ᴏᴘᴛɪᴏɴ ⚙', callback_data=f'show_options#{query.from_user.id}#{query.message.id}')
+        ]]
+
+        # Send request to REQUEST_CHANNEL
+        sent_request = await bot.send_message(
+            REQUEST_CHANNEL,
+            script.REQUEST_TXT.format(
+                query.from_user.mention,
+                query.from_user.id,
+                search
+            ),
+            reply_markup=InlineKeyboardMarkup(buttons)
+        )
+
+        # ✅ Log request (optional but useful)
+        try:
+            await bot.send_message(
+                LOG_CHANNEL,
+                f"📝 New Request Sent via Button\n\n🔹 Query: <b>{search}</b>\n🔹 User: {query.from_user.mention}\n🔹 User ID: <code>{query.from_user.id}</code>",
+                parse_mode="html"
+            )
+        except Exception as log_err:
+            print(f"Log send failed: {log_err}")
+
+        # Confirmation for user
+        btn = [[
+            InlineKeyboardButton('✨ ᴠɪᴇᴡ ʏᴏᴜʀ ʀᴇǫᴜᴇꜱᴛ ✨', url=f"{sent_request.link}")
+        ]]
+        await query.message.edit_text(
+            "<b>✅ Your request has been sent to admin!</b>",
+            reply_markup=InlineKeyboardMarkup(btn)
+        )
+        await query.answer()
+
+    except Exception as e:
+        print(f"Error in request_to_admin: {e}")
+        await query.answer("⚠️ Request failed, try again later.", show_alert=True)
+
+
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
 
@@ -1411,32 +1466,3 @@ async def silicon_spell_check(message):
   #  except:
      #   pass
 
-@Client.on_callback_query(filters.regex(r"^req_admin"))
-async def request_to_admin(bot, query):
-    _, search, user_id = query.data.split('#')
-    if int(user_id) != query.from_user.id:
-        return await query.answer(script.ALRT_TXT, show_alert=True)
-    
-    # Create buttons similar to /request command
-    buttons = [[
-        InlineKeyboardButton('👀 View Request', url=f"{query.message.link}")
-    ],[
-        InlineKeyboardButton('⚙ Show Options', callback_data=f'show_options#{query.from_user.id}#{query.message.id}')
-    ]]
-    
-    # Send to request channel (same as /request command)
-    sent_request = await bot.send_message(
-        REQUEST_CHANNEL,
-        script.REQUEST_TXT.format(query.from_user.mention, query.from_user.id, search),
-        reply_markup=InlineKeyboardMarkup(buttons)
-    )
-    
-    # Send confirmation to user
-    btn = [[
-        InlineKeyboardButton('✨ ᴠɪᴇᴡ ʏᴏᴜʀ ʀᴇᴏ̨ᴜᴇsᴛ ✨', url=f"{sent_request.link}")
-    ]]
-    await query.message.edit_text(
-        text="<b>✅ Your request has been sent to admin!</b>",
-        reply_markup=InlineKeyboardMarkup(btn)
-    )
-    await query.answer()
