@@ -1,4 +1,4 @@
-import asyncio
+ import asyncio
 import re
 import math
 from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
@@ -491,6 +491,15 @@ async def spoll_checker(bot, query):
         k = (search, files, offset, total_results)
         await auto_filter(bot, query, k)
     else:
+        try:
+            await bot.send_message(
+                LOG_CHANNEL,
+                f"📢 No results found!\n\n🔹 Query: <b>{search}</b>\n🔹 User ID: <code>{query.from_user.id}</code>\n🔹 Username: @{query.from_user.username if query.from_user.username else 'N/A'}",
+                parse_mode="html"
+            )
+        except Exception as e:
+            print(f"Failed to send log: {e}")
+
         buttons = [[
             InlineKeyboardButton("⚠️ ʀᴇᴏ̨ᴜᴇsᴛ ᴛᴏ ᴀᴅᴍɪɴ ⚠️", callback_data=f"req_admin#{search}#{query.from_user.id}")
         ], [
