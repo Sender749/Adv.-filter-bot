@@ -521,20 +521,14 @@ async def request_to_admin(bot, query):
         _, search, user_id = query.data.split('#')
         if int(user_id) != query.from_user.id:
             return await query.answer(script.ALRT_TXT, show_alert=True)
-    except Exception as e:
-        print(f"Error parsing req_admin data: {e}")
+    except Exception:
         return await query.answer("Something went wrong!", show_alert=True)
-
-    # ✅ Reuse same behavior as /req command
     try:
-        # Prepare same buttons as /req
         buttons = [[
             InlineKeyboardButton('👀 ᴠɪᴇᴡ ʀᴇǫᴜᴇꜱᴛ 👀', url=f"{query.message.link}")
-        ],[
+        ], [
             InlineKeyboardButton('⚙ sʜᴏᴡ ᴏᴘᴛɪᴏɴ ⚙', callback_data=f'show_options#{query.from_user.id}#{query.message.id}')
         ]]
-
-        # Send request to REQUEST_CHANNEL
         sent_request = await bot.send_message(
             REQUEST_CHANNEL,
             script.REQUEST_TXT.format(
@@ -544,18 +538,6 @@ async def request_to_admin(bot, query):
             ),
             reply_markup=InlineKeyboardMarkup(buttons)
         )
-
-        # ✅ Log request (optional but useful)
-        try:
-            await bot.send_message(
-                LOG_CHANNEL,
-                f"📝 New Request Sent via Button\n\n🔹 Query: <b>{search}</b>\n🔹 User: {query.from_user.mention}\n🔹 User ID: <code>{query.from_user.id}</code>",
-                parse_mode="html"
-            )
-        except Exception as log_err:
-            print(f"Log send failed: {log_err}")
-
-        # Confirmation for user
         btn = [[
             InlineKeyboardButton('✨ ᴠɪᴇᴡ ʏᴏᴜʀ ʀᴇǫᴜᴇꜱᴛ ✨', url=f"{sent_request.link}")
         ]]
@@ -564,11 +546,8 @@ async def request_to_admin(bot, query):
             reply_markup=InlineKeyboardMarkup(btn)
         )
         await query.answer()
-
-    except Exception as e:
-        print(f"Error in request_to_admin: {e}")
+    except Exception:
         await query.answer("⚠️ Request failed, try again later.", show_alert=True)
-
 
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
@@ -989,7 +968,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         return
 
     elif query.data.startswith("show_options"):
-        ident, user_id, msg_id = query.data.split("#")
+        _, ident, user_id, msg_id = query.data.split("#")
         chnl_id = query.message.chat.id
         userid = query.from_user.id
         buttons = [[
@@ -1035,15 +1014,14 @@ async def cb_handler(client: Client, query: CallbackQuery):
         chnl_id = query.message.chat.id
         userid = query.from_user.id
         buttons = [[
-            InlineKeyboardButton("😊 ᴀʟʀᴇᴀᴅʏ ᴀᴠᴀɪʟᴀʙʟᴇ 😊", callback_data=f"already_available#{user_id}#{msg_id}")
+            InlineKeyboardButton("ᴀʟʀᴇᴀᴅʏ ᴀᴠᴀɪʟᴀʙʟᴇ", callback_data=f"already_available#{user_id}#{msg_id}"),
+            InlineKeyboardButton("ɴᴏᴛ ʀᴇʟᴇᴀsᴇᴅ ʏᴇᴛ", callback_data=f"not_released#{user_id}#{msg_id}")
         ],[
-            InlineKeyboardButton("‼️ ɴᴏᴛ ʀᴇʟᴇᴀsᴇᴅ ʏᴇᴛ ‼️", callback_data=f"not_available#{user_id}#{msg_id}")
+            InlineKeyboardButton("ᴛᴇʟʟ ᴍᴇ ʏᴇᴀʀ/ʟᴀɴɢᴜᴀɢᴇ", callback_data=f"year#{user_id}#{msg_id}"),
+            InlineKeyboardButton("ᴅᴜᴅᴇ, ᴄʜᴇᴄᴋ ʏᴏᴜʀ sᴘᴇʟʟɪɴɢ", callback_data=f"upload_in#{user_id}#{msg_id}")
         ],[
-            InlineKeyboardButton("🥵 ᴛᴇʟʟ ᴍᴇ ʏᴇᴀʀ/ʟᴀɴɢᴜᴀɢᴇ 🥵", callback_data=f"year#{user_id}#{msg_id}")
-        ],[
-            InlineKeyboardButton("⚠️ ᴅᴜᴅᴇ, ᴄʜᴇᴄᴋ ʏᴏᴜʀ sᴘᴇʟʟɪɴɢ ⚠️", callback_data=f"upload_in#{user_id}#{msg_id}")
-        ],[
-            InlineKeyboardButton("☇ ᴜᴘʟᴏᴀᴅᴇᴅ ☇", callback_data=f"uploaded#{user_id}#{msg_id}")
+            InlineKeyboardButton("ᴜᴘʟᴏᴀᴅᴇᴅ", callback_data=f"uploaded#{user_id}#{msg_id}"),
+            InlineKeyboardButton("ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ", callback_data=f"not_available#{ident}#{user_id}#{msg_id}")
         ],[
             InlineKeyboardButton("🔙 ʙᴀᴄᴋ", callback_data=f"show_options#{ident}#{user_id}#{msg_id}")
         ]]
@@ -1056,12 +1034,12 @@ async def cb_handler(client: Client, query: CallbackQuery):
         except pyrogram.errors.exceptions.bad_request_400.UserNotParticipant:
             await query.answer("⚠️ ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴀ ᴍᴇᴍʙᴇʀ ᴏꜰ ᴛʜɪꜱ ᴄʜᴀɴɴᴇʟ, ꜰɪʀꜱᴛ ᴊᴏɪɴ", show_alert=True)
 
-    elif query.data.startswith("not_available"):
+    elif query.data.startswith("not_released"):
         ident, user_id, msg_id = query.data.split("#")
         chnl_id = query.message.chat.id
         userid = query.from_user.id
         buttons = [[
-            InlineKeyboardButton("🚫 ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ 🚫", callback_data=f"na_alert#{user_id}")
+            InlineKeyboardButton("🚫 ɴᴏᴛ ʀᴇʟᴇᴀsᴇᴅ 🚫", callback_data=f"na_alert#{user_id}")
         ]]
         btn = [[
             InlineKeyboardButton("♻️ ᴠɪᴇᴡ sᴛᴀᴛᴜs ♻️", url=f"{query.message.link}")
@@ -1079,7 +1057,31 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 await client.send_message(SUPPORT_GROUP, text=f"<b>💥 ʜᴇʟʟᴏ {user.mention},\n\nsᴏʀʀʏ ʏᴏᴜʀ ʀᴇǫᴜᴇsᴛ ɪs ɴᴏᴛ ʀᴇʟᴇᴀsᴇᴅ ʏᴇᴛ 😢.\n ᴀᴅᴍɪɴ ᴋᴇᴇᴘ ᴍᴏɴɪᴛᴏʀ ʏᴏᴜʀ ʀᴇᴏ̨ᴜᴇsᴛ, ᴡᴀɪᴛ ғᴏʀ ʀᴇʟᴇᴀsᴇ ᴀɴᴅ ᴛʜᴇɴ sᴇɴᴅ ʀᴇᴏ̨ᴜᴇsᴛᴇᴅ ғɪʟᴇ ɴᴀᴍᴇ ɪɴ ɢʀᴏᴜᴘ.</b>", reply_markup=InlineKeyboardMarkup(btn), reply_to_message_id=int(msg_id))
         else:
             await query.answer(script.ALRT_TXT, show_alert=True)
-
+            
+    elif query.data.startswith("not_available"):
+        ident, user_id, msg_id = query.data.split("#")
+        chnl_id = query.message.chat.id
+        userid = query.from_user.id
+        buttons = [[
+            InlineKeyboardButton("🚫 ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ 🚫", callback_data=f"hm_alert#{user_id}")
+        ]]
+        btn = [[
+            InlineKeyboardButton("♻️ ᴠɪᴇᴡ sᴛᴀᴛᴜs ♻️", url=f"{query.message.link}")
+        ]]
+        st = await client.get_chat_member(chnl_id, userid)
+        if (st.status == enums.ChatMemberStatus.ADMINISTRATOR) or (st.status == enums.ChatMemberStatus.OWNER):
+            user = await client.get_users(user_id)
+            request = query.message.text
+            await query.answer("Message sent to requester")
+            await query.message.edit_text(f"<s>{request}</s>")
+            await query.message.edit_reply_markup(InlineKeyboardMarkup(buttons))
+            try:
+                await client.send_message(chat_id=user_id, text="❌ <b>Your requested movie is not available on the internet.</b>", reply_markup=InlineKeyboardMarkup(btn))
+            except UserIsBlocked:
+                await client.send_message(SUPPORT_GROUP, text=f"❌ <b>Your requested movie is not available on the internet.</b>", reply_markup=InlineKeyboardMarkup(btn), reply_to_message_id=int(msg_id))
+        else:
+            await query.answer(script.ALRT_TXT, show_alert=True)
+            
     elif query.data.startswith("uploaded"):
         ident, user_id, msg_id = query.data.split("#")
         chnl_id = query.message.chat.id
@@ -1184,11 +1186,19 @@ async def cb_handler(client: Client, query: CallbackQuery):
         else:
             await query.answer(script.ALRT_TXT, show_alert=True)
 
-    elif query.data.startswith("na_alert"):
+    elif query.data.startswith("na_alert"):        
         ident, user_id = query.data.split("#")
         userid = query.from_user.id
         if str(userid) in user_id:
             await query.answer("sᴏʀʀʏ ʏᴏᴜʀ ʀᴇᴏ̨ᴜᴇsᴛ ɪs ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ, ᴍᴀᴋᴇ sᴜʀᴇ ɪᴛ's ʀᴇʟᴇᴀsᴇᴅ. ɪғ ʏᴇs, ᴛʜᴇɴ ɢɪᴠᴇ ᴜs sᴏᴍᴇ ᴛɪᴍᴇ 🤗", show_alert=True)
+        else:
+            await query.answer(script.ALRT_TXT, show_alert=True)
+
+    elif query.data.startswith("hm_alert"):          
+        ident, user_id = query.data.split("#")
+        userid = query.from_user.id
+        if str(userid) in user_id:
+            await query.answer("❌ <b>Your requested movie is not available on the internet.</b>", show_alert=True)
         else:
             await query.answer(script.ALRT_TXT, show_alert=True)
 
