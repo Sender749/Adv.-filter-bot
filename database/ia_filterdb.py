@@ -18,7 +18,9 @@ second_collection = None
 try:
     collection.create_index([("file_name", TEXT), ("caption", TEXT)])
 except OperationFailure as e:
-    if 'quota' in str(e).lower():
+    if "already exists" not in str(e):
+        raise e
+
         if not SECOND_FILES_DATABASE_URL:
             logger.error('Your FILES_DATABASE_URL is full; please add SECOND_FILES_DATABASE_URL.')
         else:
@@ -30,7 +32,11 @@ if SECOND_FILES_DATABASE_URL:
     second_client = MongoClient(SECOND_FILES_DATABASE_URL)
     second_db = second_client[DATABASE_NAME]
     second_collection = second_db[COLLECTION_NAME]
+try:
     second_collection.create_index([("file_name", TEXT), ("caption", TEXT)])
+except OperationFailure as e:
+    if "already exists" not in str(e):
+        raise e
 
 # -------------------------------------------------------------------
 
