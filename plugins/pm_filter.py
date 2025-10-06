@@ -968,7 +968,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
         return
 
     elif query.data.startswith("show_options"):
-        _, ident, user_id, msg_id = query.data.split("#")
+        parts = query.data.split("#")
+
+        if len(parts) == 4:
+            _, ident, user_id, msg_id = parts
+        else:
+            _, user_id, msg_id = parts
+            ident = "N/A"
         chnl_id = query.message.chat.id
         userid = query.from_user.id
         buttons = [[
@@ -1038,8 +1044,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         ident, user_id, msg_id = query.data.split("#")
         chnl_id = query.message.chat.id
         userid = query.from_user.id
-        buttons = [[
-            InlineKeyboardButton("🚫 ɴᴏᴛ ʀᴇʟᴇᴀsᴇᴅ 🚫", callback_data=f"na_alert#{user_id}")
+        buttons = [[")
         ]]
         btn = [[
             InlineKeyboardButton("♻️ ᴠɪᴇᴡ sᴛᴀᴛᴜs ♻️", url=f"{query.message.link}")
@@ -1063,7 +1068,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
         chnl_id = query.message.chat.id
         userid = query.from_user.id
         buttons = [[
-            InlineKeyboardButton("🚫 ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ 🚫", callback_data=f"hm_alert#{user_id}")
+            InlineKeyboardButton("🚫 ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ 🚫", callback_data=f"hm_alert#{user_id
+            InlineKeyboardButton("🚫 ɴᴏᴛ ʀᴇʟᴇᴀsᴇᴅ 🚫", callback_data=f"na_alert#{user_id}}")
         ]]
         btn = [[
             InlineKeyboardButton("♻️ ᴠɪᴇᴡ sᴛᴀᴛᴜs ♻️", url=f"{query.message.link}")
