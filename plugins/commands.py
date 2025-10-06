@@ -10,6 +10,7 @@ from pyrogram import Client, filters, enums
 from pyrogram.errors import ChatAdminRequired, FloodWait
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup , ForceReply, ReplyKeyboardMarkup 
 from database.users_chats_db import db
+from datetime import datetime, timedelta
 from database.extra_db import silicondb
 from database.ia_filterdb import get_file_details
 from utils import formate_file_name,  get_settings, save_group_settings, is_subscribed, is_req_subscribed, get_size, get_shortlink, is_check_admin, get_status, temp, get_readable_time, generate_trend_list, extract_limit_from_command, create_keyboard_layout, process_trending_data, log_error, group_setting_buttons
@@ -220,113 +221,113 @@ async def start(client: Client, message):
 
         is_allfiles_request = data and data.startswith("allfiles")
 #--------------------------------------------------------------------------------------------------
-        if not is_allfiles_request and IS_FILE_LIMIT and FILES_LIMIT > 0:
-            user_doc = await db.get_user(user_id)
-            if not user_doc:
-                user_doc = {"id": user_id, "used_files": 0, "limit_reset_at": None}
-                await db.update_user(user_doc)
+    if not is_allfiles_request and IS_FILE_LIMIT and FILES_LIMIT > 0:
+        user_doc = await db.get_user(user_id)
+        if not user_doc:
+            user_doc = {"id": user_id, "used_files": 0, "limit_reset_at": None}
+            await db.update_user(user_doc)
 
-            now = datetime.utcnow()
-            reset_at = user_doc.get("limit_reset_at")
+        now = datetime.utcnow()
+        reset_at = user_doc.get("limit_reset_at")
             
-            reset_at_dt = None
-            if reset_at:
-                if isinstance(reset_at, str):
-                    try:
-                        reset_at_dt = datetime.fromisoformat(reset_at)
-                    except Exception:
-                        reset_at_dt = None
-            elif isinstance(reset_at, datetime):
-                reset_at_dt = reset_at
+        reset_at_dt = None
+        if reset_at:
+            if isinstance(reset_at, str):
+                try:
+                    reset_at_dt = datetime.fromisoformat(reset_at)
+                except Exception:
+                    reset_at_dt = None
+        elif isinstance(reset_at, datetime):
+            reset_at_dt = reset_at
 
-        if reset_at_dt and now >= reset_at_dt:
-            user_doc["used_files"] = 0
-            user_doc["limit_reset_at"] = None
-            await db.update_user(user_doc)
+    if reset_at_dt and now >= reset_at_dt:
+        user_doc["used_files"] = 0
+        user_doc["limit_reset_at"] = None
+        await db.update_user(user_doc)
 
-        used = user_doc.get("used_files", 0)
+    used = user_doc.get("used_files", 0)
 
-        if used < FILES_LIMIT:
-            user_doc["used_files"] = used + 1
+    if used < FILES_LIMIT:
+        user_doc["used_files"] = used + 1
 
-            if user_doc["used_files"] >= FILES_LIMIT:
-                user_doc["limit_reset_at"] = now + timedelta(hours=FILE_LIMIT_TIMER)
+        if user_doc["used_files"] >= FILES_LIMIT:
+            user_doc["limit_reset_at"] = now + timedelta(hours=FILE_LIMIT_TIMER)
 
-            await db.update_user(user_doc)
+        await db.update_user(user_doc)
 #--------------------------------------------------------------------------------------------------
-                if not data:
-                    return
+    if not data:
+        return
 
-                files_ = await get_file_details(file_id)           
+        files_ = await get_file_details(file_id)           
 
-                if not files_:
-                    try:
-                        pre, file_id = (base64.urlsafe_b64decode(data + "=" * (-len(data) % 4))).decode("ascii").split("_", 1)
-                    except:
-                        pass
-                    return await message.reply('<b>⚠️ ᴀʟʟ ꜰɪʟᴇs ɴᴏᴛ ꜰᴏᴜɴᴅ ⚠️</b>')
+        if not files_:
+            try:
+                pre, file_id = (base64.urlsafe_b64decode(data + "=" * (-len(data) % 4))).decode("ascii").split("_", 1)
+            except:
+                pass
+            return await message.reply('<b>⚠️ ᴀʟʟ ꜰɪʟᴇs ɴᴏᴛ ꜰᴏᴜɴᴅ ⚠️</b>')
 
-                if isinstance(files_, list) and len(files_) > 0:
-                    files = files_[0]
-                elif isinstance(files_, dict):
-                    files = files_
-                else:
-                    return await message.reply('<b>⚠️ ᴀʟʟ ꜰɪʟᴇs ɴᴏᴛ ꜰᴏᴜɴᴅ ⚠️</b>')
+        if isinstance(files_, list) and len(files_) > 0:
+            files = files_[0]
+        elif isinstance(files_, dict):
+            files = files_
+        else:
+            return await message.reply('<b>⚠️ ᴀʟʟ ꜰɪʟᴇs ɴᴏᴛ ꜰᴏᴜɴᴅ ⚠️</b>')
 
-                settings = await get_settings(grp_id)
+        settings = await get_settings(grp_id)
 
-                file_limit_info = f"\n\n📊 ʏᴏᴜ ʜᴀᴠᴇ ʀᴇᴄᴇɪᴠᴇᴅ {current_file_count}/{FILES_LIMIT} ꜰʀᴇᴇ ꜰɪʟᴇs"
+        file_limit_info = f"\n\n📊 ʏᴏᴜ ʜᴀᴠᴇ ʀᴇᴄᴇɪᴠᴇᴅ {current_file_count}/{FILES_LIMIT} ꜰʀᴇᴇ ꜰɪʟᴇs"
                 
-                f_caption = settings['caption'].format(
-                    file_name=formate_file_name(files['file_name']),
-                    file_size=get_size(files['file_size']),
-                    file_caption=files.get('caption', '')
-                ) + file_limit_info
+        f_caption = settings['caption'].format(
+            file_name=formate_file_name(files['file_name']),
+            file_size=get_size(files['file_size']),
+            file_caption=files.get('caption', '')
+         ) + file_limit_info
 
-                btn = [[InlineKeyboardButton("✛ ᴡᴀᴛᴄʜ & ᴅᴏᴡɴʟᴏᴀᴅ ✛", callback_data=f'stream#{file_id}')]]
-                toDel = await client.send_cached_media(
-                    chat_id=message.from_user.id,
-                    file_id=file_id,
-                    caption=f_caption,
-                    reply_markup=InlineKeyboardMarkup(btn)
-                )
+          btn = [[InlineKeyboardButton("✛ ᴡᴀᴛᴄʜ & ᴅᴏᴡɴʟᴏᴀᴅ ✛", callback_data=f'stream#{file_id}')]]
+         toDel = await client.send_cached_media(
+              chat_id=message.from_user.id,
+               file_id=file_id,
+              caption=f_caption,
+              reply_markup=InlineKeyboardMarkup(btn)
+         )
 
-                time_text = f'{FILE_AUTO_DEL_TIMER / 60} ᴍɪɴᴜᴛᴇs' if FILE_AUTO_DEL_TIMER >= 60 else f'{FILE_AUTO_DEL_TIMER} sᴇᴄᴏɴᴅs'
-                delCap = f"<b>ʏᴏᴜʀ ғɪʟᴇ ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ ᴀғᴛᴇʀ {time_text} ᴛᴏ ᴀᴠᴏɪᴅ ᴄᴏᴘʏʀɪɢʜᴛ ᴠɪᴏʟᴀᴛɪᴏɴs!</b>"
-                afterDelCap = f"<b>ʏᴏᴜʀ ғɪʟᴇ ɪs ᴅᴇʟᴇᴛᴇᴅ ᴀғᴛᴇʀ {time_text} ᴛᴏ ᴀᴠᴏɪᴅ ᴄᴏᴘʏʀɪɢʜᴛ ᴠɪᴏʟᴀᴛɪᴏɴs!</b>"
+        time_text = f'{FILE_AUTO_DEL_TIMER / 60} ᴍɪɴᴜᴛᴇs' if FILE_AUTO_DEL_TIMER >= 60 else f'{FILE_AUTO_DEL_TIMER} sᴇᴄᴏɴᴅs'
+        delCap = f"<b>ʏᴏᴜʀ ғɪʟᴇ ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ ᴀғᴛᴇʀ {time_text} ᴛᴏ ᴀᴠᴏɪᴅ ᴄᴏᴘʏʀɪɢʜᴛ ᴠɪᴏʟᴀᴛɪᴏɴs!</b>"
+        afterDelCap = f"<b>ʏᴏᴜʀ ғɪʟᴇ ɪs ᴅᴇʟᴇᴛᴇᴅ ᴀғᴛᴇʀ {time_text} ᴛᴏ ᴀᴠᴏɪᴅ ᴄᴏᴘʏʀɪɢʜᴛ ᴠɪᴏʟᴀᴛɪᴏɴs!</b>"
 
-                replyed = await message.reply(delCap, reply_to_message_id=toDel.id)
-                await asyncio.sleep(FILE_AUTO_DEL_TIMER)
-                await toDel.delete()
-                return await replyed.edit(afterDelCap)
+        replyed = await message.reply(delCap, reply_to_message_id=toDel.id)
+        await asyncio.sleep(FILE_AUTO_DEL_TIMER)
+        await toDel.delete()
+        return await replyed.edit(afterDelCap)
 
-        if settings.get("is_verify", IS_VERIFY) and (not user_verified or is_second_shortener or is_third_shortener):
-            verify_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=7))
-            await db.create_verify_id(user_id, verify_id)
-            temp.CHAT[user_id] = grp_id
-            verify = await get_shortlink(f"https://telegram.me/{temp.U_NAME}?start=notcopy_{user_id}_{verify_id}_{file_id}", grp_id, is_second_shortener, is_third_shortener)
-            if is_third_shortener:
-                silicon = settings.get('tutorial_three', TUTORIAL3)
-            else:
-                silicon = settings.get('tutorial_two', TUTORIAL2) if is_second_shortener else settings.get('tutorial', TUTORIAL)
+if settings.get("is_verify", IS_VERIFY) and (not user_verified or is_second_shortener or is_third_shortener):
+    verify_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=7))
+    await db.create_verify_id(user_id, verify_id)
+    temp.CHAT[user_id] = grp_id
+    verify = await get_shortlink(f"https://telegram.me/{temp.U_NAME}?start=notcopy_{user_id}_{verify_id}_{file_id}", grp_id, is_second_shortener, is_third_shortener)
+    if is_third_shortener:
+        silicon = settings.get('tutorial_three', TUTORIAL3)
+    else:
+        silicon = settings.get('tutorial_two', TUTORIAL2) if is_second_shortener else settings.get('tutorial', TUTORIAL)
 
-            buttons = [
-                [InlineKeyboardButton(text="♻️ ᴠᴇʀɪғʏ ♻️", url=verify)],
-                [InlineKeyboardButton(text="❗️ ʜᴏᴡ ᴛᴏ ᴠᴇʀɪғʏ ❓", url=silicon)]
-            ]
+    buttons = [
+        [InlineKeyboardButton(text="♻️ ᴠᴇʀɪғʏ ♻️", url=verify)],
+        [InlineKeyboardButton(text="❗️ ʜᴏᴡ ᴛᴏ ᴠᴇʀɪғʏ ❓", url=silicon)]
+    ]
 
-            msg = script.THIRDT_VERIFICATION_TEXT if await db.user_verified(user_id) else (script.SECOND_VERIFICATION_TEXT if is_second_shortener else script.VERIFICATION_TEXT)
+    msg = script.THIRDT_VERIFICATION_TEXT if await db.user_verified(user_id) else (script.SECOND_VERIFICATION_TEXT if is_second_shortener else script.VERIFICATION_TEXT)
 
-            d = await m.reply_text(
-                text=msg.format(message.from_user.mention, get_status()),
-                protect_content=False,
-                reply_markup=InlineKeyboardMarkup(buttons),
-                parse_mode=enums.ParseMode.HTML
-            )
-            await asyncio.sleep(300) 
-            await d.delete()
-            await m.delete()
-            return
+    d = await m.reply_text(
+         text=msg.format(message.from_user.mention, get_status()),
+        protect_content=False,
+        reply_markup=InlineKeyboardMarkup(buttons),
+        parse_mode=enums.ParseMode.HTML
+    )
+     await asyncio.sleep(300) 
+     await d.delete()
+     await m.delete()
+     return
 
     if data and data.startswith("allfiles"):
         _, key = data.split("_", 1)
