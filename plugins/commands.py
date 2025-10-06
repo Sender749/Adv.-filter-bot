@@ -289,48 +289,48 @@ async def start(client: Client, message):
     if not data:
         return
 
-        files_ = await get_file_details(file_id)           
+    files_ = await get_file_details(file_id)           
 
-        if not files_:
-            try:
-                pre, file_id = (base64.urlsafe_b64decode(data + "=" * (-len(data) % 4))).decode("ascii").split("_", 1)
-            except:
-                pass
-            return await message.reply('<b>⚠️ ᴀʟʟ ꜰɪʟᴇs ɴᴏᴛ ꜰᴏᴜɴᴅ ⚠️</b>')
+    if not files_:
+        try:
+            pre, file_id = (base64.urlsafe_b64decode(data + "=" * (-len(data) % 4))).decode("ascii").split("_", 1)
+        except:
+            pass
+        return await message.reply('<b>⚠️ ᴀʟʟ ꜰɪʟᴇs ɴᴏᴛ ꜰᴏᴜɴᴅ ⚠️</b>')
 
-        if isinstance(files_, list) and len(files_) > 0:
-            files = files_[0]
-        elif isinstance(files_, dict):
-            files = files_
-        else:
-            return await message.reply('<b>⚠️ ᴀʟʟ ꜰɪʟᴇs ɴᴏᴛ ꜰᴏᴜɴᴅ ⚠️</b>')
+    if isinstance(files_, list) and len(files_) > 0:
+        files = files_[0]
+    elif isinstance(files_, dict):
+        files = files_
+    else:
+        return await message.reply('<b>⚠️ ᴀʟʟ ꜰɪʟᴇs ɴᴏᴛ ꜰᴏᴜɴᴅ ⚠️</b>')
 
-        settings = await get_settings(grp_id)
+    settings = await get_settings(grp_id)
 
-        file_limit_info = f"\n\n📊 ʏᴏᴜ ʜᴀᴠᴇ ʀᴇᴄᴇɪᴠᴇᴅ {current_file_count}/{FILES_LIMIT} ꜰʀᴇᴇ ꜰɪʟᴇs"
+    file_limit_info = f"\n\n📊 ʏᴏᴜ ʜᴀᴠᴇ ʀᴇᴄᴇɪᴠᴇᴅ {current_file_count}/{FILES_LIMIT} ꜰʀᴇᴇ ꜰɪʟᴇs"
                 
-        f_caption = settings['caption'].format(
-            file_name=formate_file_name(files['file_name']),
-            file_size=get_size(files['file_size']),
-            file_caption=files.get('caption', '')
-         ) + file_limit_info
+    f_caption = settings['caption'].format(
+        file_name=formate_file_name(files['file_name']),
+        file_size=get_size(files['file_size']),
+        file_caption=files.get('caption', '')
+    ) + file_limit_info
 
-          btn = [[InlineKeyboardButton("✛ ᴡᴀᴛᴄʜ & ᴅᴏᴡɴʟᴏᴀᴅ ✛", callback_data=f'stream#{file_id}')]]
-          toDel = await client.send_cached_media(
-              chat_id=message.from_user.id,
-              file_id=file_id,
-              caption=f_caption,
-              reply_markup=InlineKeyboardMarkup(btn)
-         )
+    btn = [[InlineKeyboardButton("✛ ᴡᴀᴛᴄʜ & ᴅᴏᴡɴʟᴏᴀᴅ ✛", callback_data=f'stream#{file_id}')]]
+    toDel = await client.send_cached_media(
+        chat_id=message.from_user.id,
+        file_id=file_id,
+        caption=f_caption,
+        reply_markup=InlineKeyboardMarkup(btn)
+    )
 
-        time_text = f'{FILE_AUTO_DEL_TIMER / 60} ᴍɪɴᴜᴛᴇs' if FILE_AUTO_DEL_TIMER >= 60 else f'{FILE_AUTO_DEL_TIMER} sᴇᴄᴏɴᴅs'
-        delCap = f"<b>ʏᴏᴜʀ ғɪʟᴇ ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ ᴀғᴛᴇʀ {time_text} ᴛᴏ ᴀᴠᴏɪᴅ ᴄᴏᴘʏʀɪɢʜᴛ ᴠɪᴏʟᴀᴛɪᴏɴs!</b>"
-        afterDelCap = f"<b>ʏᴏᴜʀ ғɪʟᴇ ɪs ᴅᴇʟᴇᴛᴇᴅ ᴀғᴛᴇʀ {time_text} ᴛᴏ ᴀᴠᴏɪᴅ ᴄᴏᴘʏʀɪɢʜᴛ ᴠɪᴏʟᴀᴛɪᴏɴs!</b>"
+    time_text = f'{FILE_AUTO_DEL_TIMER / 60} ᴍɪɴᴜᴛᴇs' if FILE_AUTO_DEL_TIMER >= 60 else f'{FILE_AUTO_DEL_TIMER} sᴇᴄᴏɴᴅs'
+    delCap = f"<b>ʏᴏᴜʀ ғɪʟᴇ ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ ᴀғᴛᴇʀ {time_text} ᴛᴏ ᴀᴠᴏɪᴅ ᴄᴏᴘʏʀɪɢʜᴛ ᴠɪᴏʟᴀᴛɪᴏɴs!</b>"
+    afterDelCap = f"<b>ʏᴏᴜʀ ғɪʟᴇ ɪs ᴅᴇʟᴇᴛᴇᴅ ᴀғᴛᴇʀ {time_text} ᴛᴏ ᴀᴠᴏɪᴅ ᴄᴏᴘʏʀɪɢʜᴛ ᴠɪᴏʟᴀᴛɪᴏɴs!</b>"
 
-        replyed = await message.reply(delCap, reply_to_message_id=toDel.id)
-        await asyncio.sleep(FILE_AUTO_DEL_TIMER)
-        await toDel.delete()
-        return await replyed.edit(afterDelCap)
+    replyed = await message.reply(delCap, reply_to_message_id=toDel.id)
+    await asyncio.sleep(FILE_AUTO_DEL_TIMER)
+    await toDel.delete()
+    return await replyed.edit(afterDelCap)
 
 if settings.get("is_verify", IS_VERIFY) and (not user_verified or is_second_shortener or is_third_shortener):
     verify_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=7))
