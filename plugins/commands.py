@@ -50,10 +50,11 @@ async def start(client: Client, message):
             ],
             [
                 InlineKeyboardButton('• ᴛᴏᴘ', callback_data='top_search'),
-                InlineKeyboardButton('• ᴀʙᴏᴜᴛ', callback_data='about')
-            ],
-            [InlineKeyboardButton('• ᴇᴀʀɴ ᴍᴏɴᴇʏ ᴡɪᴛʜ ʙᴏᴛ •', callback_data='earn')]
-        ]
+                InlineKeyboardButton ('📖 ᴅᴍᴄᴀ', callback_data='dmca')
+                #InlineKeyboardButton('• ᴀʙᴏᴜᴛ', callback_data='about')
+            ]]
+           # [InlineKeyboardButton('• ᴇᴀʀɴ ᴍᴏɴᴇʏ ᴡɪᴛʜ ʙᴏᴛ •', callback_data='earn')]
+       # ]
 
     if len(message.command) == 2 and data.startswith('getfile'):
         movies = message.command[1].split("-", 1)[1] 
