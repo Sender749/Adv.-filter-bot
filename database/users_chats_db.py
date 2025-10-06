@@ -415,4 +415,31 @@ class Database:
                 {"$pull": {"group_ids": group_id}}
             )
 
+    # ------------------ FILE LIMIT FUNCTIONS ------------------
+
+    async def get_user_limit_info(self, user_id: int):
+        """Return user's file usage and reset time."""
+        user = await self.users.find_one({'id': int(user_id)})
+        if not user:
+            # If new user, create entry
+            user = {
+                'id': int(user_id),
+                'used_files': 0,
+                'limit_reset_at': None
+            }
+            await self.users.insert_one(user)
+        return {
+            'used_files': user.get('used_files', 0),
+            'limit_reset_at': user.get('limit_reset_at')
+        }
+
+    async def update_user_limit(self, user_id: int, used_files: int, limit_reset_at=None):
+        """Update user's used file count and reset time."""
+        update_data = {
+            'used_files': used_files,
+            'limit_reset_at': limit_reset_at
+        }
+        await self.users.update_one({'id': int(user_id)}, {'$set': update_data}, upsert=True)
+
+
 db = Database()
