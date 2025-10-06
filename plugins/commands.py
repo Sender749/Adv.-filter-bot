@@ -220,7 +220,7 @@ async def start(client: Client, message):
         is_third_shortener = await db.use_third_shortener(user_id, settings.get('third_verify_time', THREE_VERIFY_GAP))
 
         is_allfiles_request = data and data.startswith("allfiles")
-#--------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------
     if not is_allfiles_request and IS_FILE_LIMIT and FILES_LIMIT > 0:
         user_doc = await db.get_user(user_id)
         if not user_doc:
@@ -229,32 +229,52 @@ async def start(client: Client, message):
 
         now = datetime.utcnow()
         reset_at = user_doc.get("limit_reset_at")
-            
+
+        # Convert stored string to datetime safely
         reset_at_dt = None
         if reset_at:
-            if isinstance(reset_at, str):
+            try:
+                reset_at_dt = datetime.fromisoformat(reset_at) if isinstance(reset_at, str) else reset_at
+            except Exception:
+                reset_at_dt = None
+
+    # If reset time expired → reset file count
+        if reset_at_dt and now >= reset_at_dt:
+            user_doc["used_files"] = 0
+            user_doc["limit_reset_at"] = None
+            await db.update_user(user_doc)
+
+        used = user_doc.get("used_files", 0)
+
+    # If user still has free files available
+        if used < FILES_LIMIT:
+            user_doc["used_files"] = used + 1
+
+            # When limit just reached → set reset timer
+            if user_doc["used_files"] >= FILES_LIMIT:
+                next_reset = now + timedelta(hours=FILE_LIMIT_TIMER)
+                user_doc["limit_reset_at"] = next_reset.isoformat()
+                await db.update_user(user_doc)
+
+            await db.update_user(user_doc)
+
+        else:
+        # Limit reached — show waiting message
+            remaining = None
+            if user_doc.get("limit_reset_at"):
                 try:
-                    reset_at_dt = datetime.fromisoformat(reset_at)
-                except Exception:
-                    reset_at_dt = None
-        elif isinstance(reset_at, datetime):
-            reset_at_dt = reset_at
+                    remaining_seconds = (datetime.fromisoformat(user_doc["limit_reset_at"]) - now).total_seconds()
+                    hours = int(remaining_seconds // 3600)
+                    minutes = int((remaining_seconds % 3600) // 60)
+                    remaining = f"{hours}h {minutes}m" if hours or minutes else "a few minutes"
+                except:
+                    remaining = f"{FILE_LIMIT_TIMER} hours"
 
-    if reset_at_dt and now >= reset_at_dt:
-        user_doc["used_files"] = 0
-        user_doc["limit_reset_at"] = None
-        await db.update_user(user_doc)
-
-    used = user_doc.get("used_files", 0)
-
-    if used < FILES_LIMIT:
-        user_doc["used_files"] = used + 1
-
-        if user_doc["used_files"] >= FILES_LIMIT:
-            user_doc["limit_reset_at"] = now + timedelta(hours=FILE_LIMIT_TIMER)
-
-        await db.update_user(user_doc)
-#--------------------------------------------------------------------------------------------------
+            return await message.reply(
+                f"⚠️ You’ve reached your free file limit ({FILES_LIMIT}).\n\n"
+                f"⏳ Please wait {remaining or FILE_LIMIT_TIMER} before requesting more files."
+            )
+# --------------------------------------------------------------------------------------------------
     if not data:
         return
 
