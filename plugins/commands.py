@@ -316,9 +316,9 @@ async def start(client: Client, message):
          ) + file_limit_info
 
           btn = [[InlineKeyboardButton("✛ ᴡᴀᴛᴄʜ & ᴅᴏᴡɴʟᴏᴀᴅ ✛", callback_data=f'stream#{file_id}')]]
-         toDel = await client.send_cached_media(
+          toDel = await client.send_cached_media(
               chat_id=message.from_user.id,
-               file_id=file_id,
+              file_id=file_id,
               caption=f_caption,
               reply_markup=InlineKeyboardMarkup(btn)
          )
