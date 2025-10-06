@@ -355,37 +355,37 @@ if settings.get("is_verify", IS_VERIFY) and (not user_verified or is_second_shor
         reply_markup=InlineKeyboardMarkup(buttons),
         parse_mode=enums.ParseMode.HTML
     )
-     await asyncio.sleep(300) 
-     await d.delete()
-     await m.delete()
-     return
+    await asyncio.sleep(300) 
+    await d.delete()
+    await m.delete()
+    return
 
-    if data and data.startswith("allfiles"):
-        _, key = data.split("_", 1)
-        files = temp.FILES_ID.get(key)
-        if not files:
-            await message.reply_text("<b>⚠️ ᴀʟʟ ꜰɪʟᴇs ɴᴏᴛ ꜰᴏᴜɴᴅ ⚠️</b>")
-            return
+if data and data.startswith("allfiles"):
+    _, key = data.split("_", 1)
+    files = temp.FILES_ID.get(key)
+    if not files:
+        await message.reply_text("<b>⚠️ ᴀʟʟ ꜰɪʟᴇs ɴᴏᴛ ꜰᴏᴜɴᴅ ⚠️</b>")
+        return
 
-        files_to_delete = []
-        for file in files:
-            grp_id = temp.CHAT.get(user_id)
-            settings = await get_settings(grp_id)
+    files_to_delete = []
+    for file in files:
+        grp_id = temp.CHAT.get(user_id)
+        settings = await get_settings(grp_id)
             
-            f_caption = settings['caption'].format(
-                file_name=formate_file_name(file['file_name']),
-                file_size=get_size(file['file_size']),
-                file_caption=file.get('caption', '')
-            )
+        f_caption = settings['caption'].format(
+             file_name=formate_file_name(file['file_name']),
+             file_size=get_size(file['file_size']),
+             file_caption=file.get('caption', '')
+        )
             
-            btn = [[InlineKeyboardButton("✛ ᴡᴀᴛᴄʜ & ᴅᴏᴡɴʟᴏᴀᴅ ✛", callback_data=f'stream#{file["_id"]}')]]
-            toDel = await client.send_cached_media(
-                chat_id=message.from_user.id,
-                file_id=file['_id'],
-                caption=f_caption,
-                reply_markup=InlineKeyboardMarkup(btn)
-             )
-            files_to_delete.append(toDel)
+        btn = [[InlineKeyboardButton("✛ ᴡᴀᴛᴄʜ & ᴅᴏᴡɴʟᴏᴀᴅ ✛", callback_data=f'stream#{file["_id"]}')]]
+        toDel = await client.send_cached_media(
+            chat_id=message.from_user.id,
+            file_id=file['_id'],
+            caption=f_caption,
+            reply_markup=InlineKeyboardMarkup(btn)
+         )
+        files_to_delete.append(toDel)
 
         time_text = f'{FILE_AUTO_DEL_TIMER / 60} ᴍɪɴᴜᴛᴇs' if FILE_AUTO_DEL_TIMER >= 60 else f'{FILE_AUTO_DEL_TIMER} sᴇᴄᴏɴᴅs'
         delCap = f"<b>ᴀʟʟ {len(files_to_delete)} ғɪʟᴇs ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ ᴀғᴛᴇʀ {time_text} ᴛᴏ ᴀᴠᴏɪᴅ ᴄᴏᴘʏʀɪɢʜᴛ ᴠɪᴏʟᴀᴛɪᴏɴs!</b>"
