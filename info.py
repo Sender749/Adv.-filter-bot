@@ -34,8 +34,8 @@ FSUB_PICS = (environ.get('FSUB_PICS', 'https://graph.org/file/7478ff3eac37f4329c
 
 # File Limit
 
-IS_FILE_LIMIT = is_enabled('IS_FILE_LIMIT', False) # Enable Or Disable File Limit
-FILES_LIMIT = int(environ.get("FREE_FILES", "2")) #No. of File User Gets In Free
+IS_FILE_LIMIT = is_enabled('IS_FILE_LIMIT', True) # Enable Or Disable File Limit
+FILES_LIMIT = int(environ.get("FREE_FILES", "3")) #No. of File User Gets In Free
 #FILE_LIMIT_TIMER = float(environ.get("FILE_LIMIT_TIMER", "0.01")) #In hours
 
 # Database Settings
